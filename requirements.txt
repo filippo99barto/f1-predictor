@@ -3,3 +3,4 @@ jupyter
 ipykernel
 pandas
 numpy
+pytest
