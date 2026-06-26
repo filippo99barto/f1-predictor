@@ -78,8 +78,8 @@ def gold_season_df():
             "driverId": "max_verstappen",
             "constructorId": "red_bull",
             "race_datetime": pd.to_datetime("2024-03-01 15:00:00"),
-            "driver_last_race_position": pd.NA,
-            "driver_median_position_last_3_races": pd.NA,
+            "driver_last_race_position": float("nan"),
+            "driver_median_position_last_3_races": float("nan"),
         },
         {
             "season": 2024,
@@ -96,7 +96,7 @@ def gold_season_df():
             "constructorId": "red_bull",
             "race_datetime": pd.to_datetime("2024-03-02 15:00:00"),
             "driver_last_race_position": 3.0,
-            "driver_median_position_last_3_races": 3,
+            "driver_median_position_last_3_races": 3.0,
         },
         {
             "season": 2024,
@@ -112,15 +112,14 @@ def gold_season_df():
             "driverId": "perez",
             "constructorId": "red_bull",
             "race_datetime": pd.to_datetime("2024-03-02 15:00:00"),
-            "driver_last_race_position": pd.NA,
-            "driver_median_position_last_3_races": pd.NA,
+            "driver_last_race_position": float("nan"),
+            "driver_median_position_last_3_races": float("nan"),
         },
     ])
 
     return df.astype({
         "grid": "Int64", 
-        "driver_last_race_position": "Int64",
-        "driver_median_position_last_3_races": "Int64",
+
         "race_datetime": "datetime64[ns]",
         })
 
@@ -137,6 +136,6 @@ def fake_storage(silver_season_df):
 def test_build_gold_produces_the_correct_data(fake_storage, gold_season_df):
     pipeline = GoldPipeline(fake_storage)
     gold = pipeline.build_gold_data()
-    
+
     print(gold.dtypes.compare(gold_season_df.dtypes))
     assert gold.equals(gold_season_df)
