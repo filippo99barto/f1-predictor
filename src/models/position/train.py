@@ -5,7 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
 import numpy as np
-from src.models.features import add_features
+from src.models.position.features import add_features
 import joblib
 from src.config.paths import LOCAL_MODELS_DIR
 
@@ -30,12 +30,6 @@ def load_training_data():
 def train_model():
     """Train the model."""
     train, test, features = load_training_data()
-
-    train = train.dropna(subset=features)
-    test = test.dropna(subset=features)
-
-    train = train[train["status"].isin(["Finished", "Lapped", "+1 Lap", "+2 Laps"])]
-    test = test[test["status"].isin(["Finished", "Lapped", "+1 Lap", "+2 Laps"])]
 
     x_train= train[features]
     y_train = train["position"]

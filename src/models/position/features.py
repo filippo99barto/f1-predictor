@@ -3,6 +3,9 @@ import pandas as pd
 def add_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add features to the dataframe."""
     
+    # Filter out races that were not finished
+    df = df[df["status"].isin(["Finished", "Lapped", "+1 Lap", "+2 Laps"])]
+
     df = add_driver_last_race_position(df)
     df = add_driver_median_position_last_3_races(df)
     df = add_constructor_median_position_last_3_races(df)
@@ -26,6 +29,9 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
         "driver_positions_gained_season_median",
         "driver_positions_gained_career_median"
     ]
+
+    df = df.dropna(subset=features)
+
     return df, features
 
 def add_driver_last_race_position(df: pd.DataFrame) -> pd.DataFrame:
