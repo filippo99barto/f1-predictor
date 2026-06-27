@@ -5,7 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
 import numpy as np
-from sklearn.preprocessing import OrdinalEncoder
+from src.models.features import add_features
 
 
 def load_training_data():
@@ -15,6 +15,8 @@ def load_training_data():
 
     storage_backend = LocalStorageBackend(LOCAL_DATA_DIR)
     df = storage_backend.read("gold")
+
+    df = add_features(df)
 
     HALF_2024_ROUND = 12  # rounds 1–12 train, 13–24 test
 
@@ -31,19 +33,18 @@ def train_model():
         "grid",
         "season",
         "round",
-        "raceName",
         "circuitName",
-        "locality",
-        "country",
         "driverId",
         "constructorId",
-        "race_datetime",
         "driver_last_race_position",
         "driver_median_position_last_3_races"
     ]
 
     train = train.dropna(subset=features)
     test = test.dropna(subset=features)
+
+    train = train[train["status"].isin(["Finished", "Lapped", "+1 Lap", "+2 Laps"])]
+    test = test[test["status"].isin(["Finished", "Lapped", "+1 Lap", "+2 Laps"])]
 
     x_train= train[features]
     y_train = train["position"]
@@ -61,14 +62,10 @@ def train_model():
             "driverId", 
             "constructorId", 
             "circuitName",
-            "locality",
-            "country",
-            "race_datetime",
-            "raceName",
+            "season",
+            "round"
             ]),
         ("num", "passthrough", [
-            "season",
-            "round",
             "grid",
             "driver_last_race_position", 
             "driver_median_position_last_3_races"]),
