@@ -14,7 +14,7 @@ class SilverPipeline:
         df_races, df_results = self._read_bronze_data()
 
         # Transform
-        df = df_races.merge(df_results, on=["season", "round"], how="left")
+        df = df_races.merge(df_results, on=["season", "round"], how="inner")
         df = self._transform_bronze_data(df)
 
         df = self._validate_silver_schema(df)

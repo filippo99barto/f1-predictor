@@ -1,0 +1,462 @@
+[
+    {
+        "season": "2025",
+        "round": "1",
+        "raceName": "Australian Grand Prix",
+        "Circuit.circuitName": "Albert Park Grand Prix Circuit",
+        "Circuit.Location.locality": "Melbourne",
+        "Circuit.Location.country": "Australia",
+        "date": "2025-03-16",
+        "time": "04:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "2",
+        "raceName": "Chinese Grand Prix",
+        "Circuit.circuitName": "Shanghai International Circuit",
+        "Circuit.Location.locality": "Shanghai",
+        "Circuit.Location.country": "China",
+        "date": "2025-03-23",
+        "time": "07:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "3",
+        "raceName": "Japanese Grand Prix",
+        "Circuit.circuitName": "Suzuka Circuit",
+        "Circuit.Location.locality": "Suzuka",
+        "Circuit.Location.country": "Japan",
+        "date": "2025-04-06",
+        "time": "05:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "4",
+        "raceName": "Bahrain Grand Prix",
+        "Circuit.circuitName": "Bahrain International Circuit",
+        "Circuit.Location.locality": "Sakhir",
+        "Circuit.Location.country": "Bahrain",
+        "date": "2025-04-13",
+        "time": "15:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "5",
+        "raceName": "Saudi Arabian Grand Prix",
+        "Circuit.circuitName": "Jeddah Corniche Circuit",
+        "Circuit.Location.locality": "Jeddah",
+        "Circuit.Location.country": "Saudi Arabia",
+        "date": "2025-04-20",
+        "time": "17:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "6",
+        "raceName": "Miami Grand Prix",
+        "Circuit.circuitName": "Miami International Autodrome",
+        "Circuit.Location.locality": "Miami",
+        "Circuit.Location.country": "USA",
+        "date": "2025-05-04",
+        "time": "20:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "7",
+        "raceName": "Emilia Romagna Grand Prix",
+        "Circuit.circuitName": "Autodromo Enzo e Dino Ferrari",
+        "Circuit.Location.locality": "Imola",
+        "Circuit.Location.country": "Italy",
+        "date": "2025-05-18",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "8",
+        "raceName": "Monaco Grand Prix",
+        "Circuit.circuitName": "Circuit de Monaco",
+        "Circuit.Location.locality": "Monte Carlo",
+        "Circuit.Location.country": "Monaco",
+        "date": "2025-05-25",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "9",
+        "raceName": "Spanish Grand Prix",
+        "Circuit.circuitName": "Circuit de Barcelona-Catalunya",
+        "Circuit.Location.locality": "Barcelona",
+        "Circuit.Location.country": "Spain",
+        "date": "2025-06-01",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "10",
+        "raceName": "Canadian Grand Prix",
+        "Circuit.circuitName": "Circuit Gilles Villeneuve",
+        "Circuit.Location.locality": "Montreal",
+        "Circuit.Location.country": "Canada",
+        "date": "2025-06-15",
+        "time": "18:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "11",
+        "raceName": "Austrian Grand Prix",
+        "Circuit.circuitName": "Red Bull Ring",
+        "Circuit.Location.locality": "Spielberg",
+        "Circuit.Location.country": "Austria",
+        "date": "2025-06-29",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "12",
+        "raceName": "British Grand Prix",
+        "Circuit.circuitName": "Silverstone Circuit",
+        "Circuit.Location.locality": "Silverstone",
+        "Circuit.Location.country": "UK",
+        "date": "2025-07-06",
+        "time": "14:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "13",
+        "raceName": "Belgian Grand Prix",
+        "Circuit.circuitName": "Circuit de Spa-Francorchamps",
+        "Circuit.Location.locality": "Spa",
+        "Circuit.Location.country": "Belgium",
+        "date": "2025-07-27",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "14",
+        "raceName": "Hungarian Grand Prix",
+        "Circuit.circuitName": "Hungaroring",
+        "Circuit.Location.locality": "Budapest",
+        "Circuit.Location.country": "Hungary",
+        "date": "2025-08-03",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "15",
+        "raceName": "Dutch Grand Prix",
+        "Circuit.circuitName": "Circuit Park Zandvoort",
+        "Circuit.Location.locality": "Zandvoort",
+        "Circuit.Location.country": "Netherlands",
+        "date": "2025-08-31",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "16",
+        "raceName": "Italian Grand Prix",
+        "Circuit.circuitName": "Autodromo Nazionale di Monza",
+        "Circuit.Location.locality": "Monza",
+        "Circuit.Location.country": "Italy",
+        "date": "2025-09-07",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "17",
+        "raceName": "Azerbaijan Grand Prix",
+        "Circuit.circuitName": "Baku City Circuit",
+        "Circuit.Location.locality": "Baku",
+        "Circuit.Location.country": "Azerbaijan",
+        "date": "2025-09-21",
+        "time": "11:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "18",
+        "raceName": "Singapore Grand Prix",
+        "Circuit.circuitName": "Marina Bay Street Circuit",
+        "Circuit.Location.locality": "Marina Bay",
+        "Circuit.Location.country": "Singapore",
+        "date": "2025-10-05",
+        "time": "12:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "19",
+        "raceName": "United States Grand Prix",
+        "Circuit.circuitName": "Circuit of the Americas",
+        "Circuit.Location.locality": "Austin",
+        "Circuit.Location.country": "USA",
+        "date": "2025-10-19",
+        "time": "19:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "20",
+        "raceName": "Mexico City Grand Prix",
+        "Circuit.circuitName": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+        "Circuit.Location.locality": "Mexico City",
+        "Circuit.Location.country": "Mexico",
+        "date": "2025-10-26",
+        "time": "20:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "21",
+        "raceName": "S\u00e3o Paulo Grand Prix",
+        "Circuit.circuitName": "Aut\u00f3dromo Jos\u00e9 Carlos Pace",
+        "Circuit.Location.locality": "S\u00e3o Paulo",
+        "Circuit.Location.country": "Brazil",
+        "date": "2025-11-09",
+        "time": "17:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "22",
+        "raceName": "Las Vegas Grand Prix",
+        "Circuit.circuitName": "Las Vegas Strip Street Circuit",
+        "Circuit.Location.locality": "Las Vegas",
+        "Circuit.Location.country": "USA",
+        "date": "2025-11-23",
+        "time": "04:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "23",
+        "raceName": "Qatar Grand Prix",
+        "Circuit.circuitName": "Losail International Circuit",
+        "Circuit.Location.locality": "Lusail",
+        "Circuit.Location.country": "Qatar",
+        "date": "2025-11-30",
+        "time": "16:00:00Z"
+    },
+    {
+        "season": "2025",
+        "round": "24",
+        "raceName": "Abu Dhabi Grand Prix",
+        "Circuit.circuitName": "Yas Marina Circuit",
+        "Circuit.Location.locality": "Abu Dhabi",
+        "Circuit.Location.country": "UAE",
+        "date": "2025-12-07",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "1",
+        "raceName": "Australian Grand Prix",
+        "Circuit.circuitName": "Albert Park Grand Prix Circuit",
+        "Circuit.Location.locality": "Melbourne",
+        "Circuit.Location.country": "Australia",
+        "date": "2026-03-08",
+        "time": "04:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "2",
+        "raceName": "Chinese Grand Prix",
+        "Circuit.circuitName": "Shanghai International Circuit",
+        "Circuit.Location.locality": "Shanghai",
+        "Circuit.Location.country": "China",
+        "date": "2026-03-15",
+        "time": "07:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "3",
+        "raceName": "Japanese Grand Prix",
+        "Circuit.circuitName": "Suzuka Circuit",
+        "Circuit.Location.locality": "Suzuka",
+        "Circuit.Location.country": "Japan",
+        "date": "2026-03-29",
+        "time": "05:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "4",
+        "raceName": "Miami Grand Prix",
+        "Circuit.circuitName": "Miami International Autodrome",
+        "Circuit.Location.locality": "Miami",
+        "Circuit.Location.country": "USA",
+        "date": "2026-05-03",
+        "time": "20:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "5",
+        "raceName": "Canadian Grand Prix",
+        "Circuit.circuitName": "Circuit Gilles Villeneuve",
+        "Circuit.Location.locality": "Montreal",
+        "Circuit.Location.country": "Canada",
+        "date": "2026-05-24",
+        "time": "20:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "6",
+        "raceName": "Monaco Grand Prix",
+        "Circuit.circuitName": "Circuit de Monaco",
+        "Circuit.Location.locality": "Monte Carlo",
+        "Circuit.Location.country": "Monaco",
+        "date": "2026-06-07",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "7",
+        "raceName": "Barcelona Grand Prix",
+        "Circuit.circuitName": "Circuit de Barcelona-Catalunya",
+        "Circuit.Location.locality": "Barcelona",
+        "Circuit.Location.country": "Spain",
+        "date": "2026-06-14",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "8",
+        "raceName": "Austrian Grand Prix",
+        "Circuit.circuitName": "Red Bull Ring",
+        "Circuit.Location.locality": "Spielberg",
+        "Circuit.Location.country": "Austria",
+        "date": "2026-06-28",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "9",
+        "raceName": "British Grand Prix",
+        "Circuit.circuitName": "Silverstone Circuit",
+        "Circuit.Location.locality": "Silverstone",
+        "Circuit.Location.country": "UK",
+        "date": "2026-07-05",
+        "time": "14:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "10",
+        "raceName": "Belgian Grand Prix",
+        "Circuit.circuitName": "Circuit de Spa-Francorchamps",
+        "Circuit.Location.locality": "Spa",
+        "Circuit.Location.country": "Belgium",
+        "date": "2026-07-19",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "11",
+        "raceName": "Hungarian Grand Prix",
+        "Circuit.circuitName": "Hungaroring",
+        "Circuit.Location.locality": "Budapest",
+        "Circuit.Location.country": "Hungary",
+        "date": "2026-07-26",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "12",
+        "raceName": "Dutch Grand Prix",
+        "Circuit.circuitName": "Circuit Park Zandvoort",
+        "Circuit.Location.locality": "Zandvoort",
+        "Circuit.Location.country": "Netherlands",
+        "date": "2026-08-23",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "13",
+        "raceName": "Italian Grand Prix",
+        "Circuit.circuitName": "Autodromo Nazionale di Monza",
+        "Circuit.Location.locality": "Monza",
+        "Circuit.Location.country": "Italy",
+        "date": "2026-09-06",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "14",
+        "raceName": "Spanish Grand Prix",
+        "Circuit.circuitName": "Madring",
+        "Circuit.Location.locality": "Madrid",
+        "Circuit.Location.country": "Spain",
+        "date": "2026-09-13",
+        "time": "13:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "15",
+        "raceName": "Azerbaijan Grand Prix",
+        "Circuit.circuitName": "Baku City Circuit",
+        "Circuit.Location.locality": "Baku",
+        "Circuit.Location.country": "Azerbaijan",
+        "date": "2026-09-26",
+        "time": "11:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "16",
+        "raceName": "Singapore Grand Prix",
+        "Circuit.circuitName": "Marina Bay Street Circuit",
+        "Circuit.Location.locality": "Marina Bay",
+        "Circuit.Location.country": "Singapore",
+        "date": "2026-10-11",
+        "time": "12:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "17",
+        "raceName": "United States Grand Prix",
+        "Circuit.circuitName": "Circuit of the Americas",
+        "Circuit.Location.locality": "Austin",
+        "Circuit.Location.country": "USA",
+        "date": "2026-10-25",
+        "time": "20:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "18",
+        "raceName": "Mexico City Grand Prix",
+        "Circuit.circuitName": "Aut\u00f3dromo Hermanos Rodr\u00edguez",
+        "Circuit.Location.locality": "Mexico City",
+        "Circuit.Location.country": "Mexico",
+        "date": "2026-11-01",
+        "time": "20:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "19",
+        "raceName": "Brazilian Grand Prix",
+        "Circuit.circuitName": "Aut\u00f3dromo Jos\u00e9 Carlos Pace",
+        "Circuit.Location.locality": "S\u00e3o Paulo",
+        "Circuit.Location.country": "Brazil",
+        "date": "2026-11-08",
+        "time": "17:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "20",
+        "raceName": "Las Vegas Grand Prix",
+        "Circuit.circuitName": "Las Vegas Strip Street Circuit",
+        "Circuit.Location.locality": "Las Vegas",
+        "Circuit.Location.country": "USA",
+        "date": "2026-11-22",
+        "time": "04:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "21",
+        "raceName": "Qatar Grand Prix",
+        "Circuit.circuitName": "Losail International Circuit",
+        "Circuit.Location.locality": "Lusail",
+        "Circuit.Location.country": "Qatar",
+        "date": "2026-11-29",
+        "time": "16:00:00Z"
+    },
+    {
+        "season": "2026",
+        "round": "22",
+        "raceName": "Abu Dhabi Grand Prix",
+        "Circuit.circuitName": "Yas Marina Circuit",
+        "Circuit.Location.locality": "Abu Dhabi",
+        "Circuit.Location.country": "UAE",
+        "date": "2026-12-06",
+        "time": "13:00:00Z"
+    }
+]
