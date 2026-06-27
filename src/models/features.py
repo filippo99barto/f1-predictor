@@ -2,6 +2,7 @@ import pandas as pd
 
 def add_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add features to the dataframe."""
+    
     df = add_driver_last_race_position(df)
     df = add_driver_median_position_last_3_races(df)
     df = add_constructor_median_position_last_3_races(df)

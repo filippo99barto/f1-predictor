@@ -1,7 +1,6 @@
 import pandera.pandas as pa
 from pandera.typing import Series
 
-
 class SilverSchema(pa.DataFrameModel):
     season: Series[int] = pa.Field(ge=1950)
     round: Series[int] = pa.Field(ge=1)

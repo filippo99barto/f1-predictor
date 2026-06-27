@@ -2,8 +2,8 @@ import pandera.pandas as pa
 import pandas as pd
 import pytest
 
-from src.ingestion.silver_pipeline import SilverPipeline
-from tests.fake_storage_backend import FakeStorageBackend
+from src.pipelines.silver.pipeline import SilverPipeline
+from tests.helpers.fake_storage_backend import FakeStorageBackend
 
 @pytest.fixture
 def bronze_races_df():

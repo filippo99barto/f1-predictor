@@ -1,6 +1,6 @@
 import pandas as pd
 from src.storage.storage_backend import StorageBackend
-from src.ingestion.silver_schema import SilverSchema
+from src.pipelines.silver.schema import SilverSchema
 import pandera.pandas as pa
 
 class SilverPipeline:

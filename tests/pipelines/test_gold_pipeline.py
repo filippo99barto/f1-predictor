@@ -1,9 +1,8 @@
 import pandas as pd
 import pytest
 
-from src.ingestion.gold_pipeline import GoldPipeline
-from tests.fake_storage_backend import FakeStorageBackend
-
+from src.pipelines.gold.pipeline import GoldPipeline
+from tests.helpers.fake_storage_backend import FakeStorageBackend
 
 @pytest.fixture
 def silver_season_df():
