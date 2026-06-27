@@ -78,8 +78,6 @@ def gold_season_df():
             "driverId": "max_verstappen",
             "constructorId": "red_bull",
             "race_datetime": pd.to_datetime("2024-03-01 15:00:00"),
-            "driver_last_race_position": float("nan"),
-            "driver_median_position_last_3_races": float("nan"),
         },
         {
             "season": 2024,
@@ -95,8 +93,6 @@ def gold_season_df():
             "driverId": "max_verstappen",
             "constructorId": "red_bull",
             "race_datetime": pd.to_datetime("2024-03-02 15:00:00"),
-            "driver_last_race_position": 3.0,
-            "driver_median_position_last_3_races": 3.0,
         },
         {
             "season": 2024,
@@ -112,14 +108,11 @@ def gold_season_df():
             "driverId": "perez",
             "constructorId": "red_bull",
             "race_datetime": pd.to_datetime("2024-03-02 15:00:00"),
-            "driver_last_race_position": float("nan"),
-            "driver_median_position_last_3_races": float("nan"),
         },
     ])
 
     return df.astype({
         "grid": "Int64", 
-
         "race_datetime": "datetime64[ns]",
         })
 

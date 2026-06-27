@@ -32,14 +32,14 @@ class GoldPipeline:
         df = df.drop(columns=["date", "time"])
 
         # Add driver last race position column
-        df = df.sort_values(["driverId", "season", "round"])
-        df["driver_last_race_position"] = df.groupby("driverId")["position"].shift(1)
+        # df = df.sort_values(["driverId", "season", "round"])
+        # df["driver_last_race_position"] = df.groupby("driverId")["position"].shift(1)
 
-        df = df.sort_values(["driverId", "season", "round"])
-        df["driver_median_position_last_3_races"] = (
-            df.groupby("driverId")["position"].
-            transform(lambda s: s.shift(1).rolling(3, min_periods=1).median())
-        )
+        # df = df.sort_values(["driverId", "season", "round"])
+        # df["driver_median_position_last_3_races"] = (
+        #     df.groupby("driverId")["position"].
+        #     transform(lambda s: s.shift(1).rolling(3, min_periods=1).median())
+        # )
 
         return df
 

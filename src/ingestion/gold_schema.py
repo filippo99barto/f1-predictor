@@ -17,8 +17,6 @@ class GoldSchema(pa.DataFrameModel):
     driverId: Series[str]
     constructorId: Series[str]
     race_datetime: Series[DateTime]
-    driver_last_race_position: Series[float] = pa.Field(ge=1, nullable=True)
-    driver_median_position_last_3_races: Series[float] = pa.Field(ge=1, nullable=True)
 
     class Config:
         strict = True
