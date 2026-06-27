@@ -6,6 +6,8 @@ from sklearn.ensemble import RandomForestRegressor, HistGradientBoostingRegresso
 from sklearn.metrics import mean_absolute_error
 import numpy as np
 from src.models.features import add_features
+import joblib
+from src.config.paths import LOCAL_MODELS_DIR
 
 
 def load_training_data():
@@ -16,29 +18,18 @@ def load_training_data():
     storage_backend = LocalStorageBackend(LOCAL_DATA_DIR)
     df = storage_backend.read("gold")
 
-    df = add_features(df)
+    df, features = add_features(df)
 
     HALF_2024_ROUND = 12  # rounds 1–12 train, 13–24 test
 
     train = df[(df["season"] < 2024) | ((df["season"] == 2024) & (df["round"] <= HALF_2024_ROUND))]
     test  = df[(df["season"] == 2024) & (df["round"] > HALF_2024_ROUND)]
 
-    return train, test
+    return train, test, features
 
 def train_model():
     """Train the model."""
-    train, test = load_training_data()
-
-    features = [
-        "grid",
-        "season",
-        "round",
-        "circuitName",
-        "driverId",
-        "constructorId",
-        "driver_last_race_position",
-        "driver_median_position_last_3_races"
-    ]
+    train, test, features = load_training_data()
 
     train = train.dropna(subset=features)
     test = test.dropna(subset=features)
@@ -68,7 +59,12 @@ def train_model():
         ("num", "passthrough", [
             "grid",
             "driver_last_race_position", 
-            "driver_median_position_last_3_races"]),
+            "driver_median_position_last_3_races",
+            "constructor_median_position_last_3_races",
+            "driver_circuit_median_position_last_3_races",
+            "driver_season_median_position",
+            "driver_positions_gained_season_median",
+            "driver_positions_gained_career_median"]),
     ])
 
     model = Pipeline([
@@ -80,3 +76,5 @@ def train_model():
     y_pred = model.predict(x_test)
 
     print(f"Model MAE: {mean_absolute_error(y_test, y_pred):.2f}")
+
+    joblib.dump(model, LOCAL_MODELS_DIR / "model_v2.pkl")

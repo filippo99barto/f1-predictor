@@ -2,3 +2,4 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 LOCAL_DATA_DIR = ROOT / "data"
+LOCAL_MODELS_DIR = ROOT / "saved_models"
