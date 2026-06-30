@@ -20,14 +20,14 @@ def load_training_data():
 
     df, features = add_features(df)
 
-    HALF_2024_ROUND = 12  # rounds 1–12 train, 13–24 test
+    HALF_2025_ROUND = 12  # rounds 1–12 train, 13–24 test
 
-    train = df[(df["season"] < 2024) | ((df["season"] == 2024) & (df["round"] <= HALF_2024_ROUND))]
-    test  = df[(df["season"] == 2024) & (df["round"] > HALF_2024_ROUND)]
+    train = df[(df["season"] < 2025) | ((df["season"] == 2025) & (df["round"] <= HALF_2025_ROUND))]
+    test  = df[(df["season"] == 2025) & (df["round"] > HALF_2025_ROUND)]
 
     return train, test, features
 
-def train_model():
+def train_model(version: str = "v1"):
     """Train the model."""
     train, test, features = load_training_data()
 
@@ -71,4 +71,4 @@ def train_model():
 
     print(f"Model MAE: {mean_absolute_error(y_test, y_pred):.2f}")
 
-    joblib.dump(model, LOCAL_MODELS_DIR / "model_v2.pkl")
+    joblib.dump(model, LOCAL_MODELS_DIR / "position" / f"model_{version}.pkl")
