@@ -1,8 +1,9 @@
-from src.storage.storage_backend import StorageBackend
 import pandas as pd
-from src.pipelines.gold.schema import GoldSchema
+from src.storage.storage_backend import StorageBackend
+from src.pipelines.gold.schemas import GoldSchemaRaceResults
+from src.models.race_results.features import add_features
 
-class GoldPipeline:
+class GoldPipelineRaceResults:
     def __init__(self, storage_backend: StorageBackend):
         self.storage_backend = storage_backend
 
@@ -21,26 +22,25 @@ class GoldPipeline:
         """
         Read the silver data.
         """
-        return self.storage_backend.read("silver")
+        return self.storage_backend.read("silver/race_results")
     
     def _transform_silver_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform the silver data.
         """
-        # Create datetime column, drop date and time columns
-        df["race_datetime"] = pd.to_datetime(df["date"].astype(str) + " " + df["time"])
-        df = df.drop(columns=["date", "time"])
+        df = add_features(df)
 
-        return df
+        schema_columns = list(GoldSchemaRaceResults.to_schema().columns)
+        return df[schema_columns]
 
     def _write_gold_data(self, df: pd.DataFrame) -> None:
         """
         Write the gold data.
         """
-        self.storage_backend.write("gold/ready_to_train", df)
+        self.storage_backend.write("gold/race_results/data", df)
     
     def _validate_gold_schema(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Validate the gold schema.
         """
-        return GoldSchema.validate(df, lazy=True)
+        return GoldSchemaRaceResults.validate(df, lazy=True)

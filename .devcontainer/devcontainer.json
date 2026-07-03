@@ -1,7 +1,11 @@
 {
   "name": "F1 Predictor",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.12",
+  "containerEnv": {
+    "MLFLOW_TRACKING_URI": "sqlite:///${containerWorkspaceFolder}/mlflow.db"
+  },
   "postCreateCommand": "pip install -r requirements.txt",
+  "postStartCommand": "mlflow ui",
   "customizations": {
     "vscode": {
       "extensions": [

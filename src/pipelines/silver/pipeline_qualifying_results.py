@@ -1,0 +1,47 @@
+import pandas as pd
+from src.storage.storage_backend import StorageBackend
+from src.pipelines.silver.schemas import SilverSchemaQualifyingResults
+
+class SilverPipelineQualifyingResults:
+    def __init__(self, storage_backend: StorageBackend):
+        self.storage_backend = storage_backend
+
+    def build_silver_data(self) -> pd.DataFrame:
+        """
+        Build the silver data from the bronze data.
+        """
+        df_races, df_qualifying = self._read_bronze_data()
+        df = self._transform_bronze_data(df_races, df_qualifying)
+        df = self._validate_silver_schema(df)
+        self._write_silver_data(df)
+
+        return df
+
+    def _read_bronze_data(self) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Read the bronze data.
+        """
+        df_races = self.storage_backend.read("bronze/races")
+        df_qualifying = self.storage_backend.read("bronze/qualifying_results")
+        return df_races, df_qualifying
+
+    def _transform_bronze_data(self, df_races: pd.DataFrame, df_qualifying: pd.DataFrame) -> pd.DataFrame:
+        """Transform the bronze data."""
+
+        df = (
+            df_races.merge(df_qualifying, on=["season", "round"], how="inner")
+            .rename(columns=lambda col: col.split(".")[-1])
+            .rename(columns={"position": "grid_position"})
+        )
+
+        schema_columns = list(SilverSchemaQualifyingResults.to_schema().columns)
+        return df[schema_columns]
+
+    def _validate_silver_schema(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Validate the silver schema."""
+        validated = SilverSchemaQualifyingResults.validate(df, lazy=True)
+        return validated
+
+    def _write_silver_data(self, df: pd.DataFrame) -> None:
+        """Write the silver data."""
+        self.storage_backend.write("silver/qualifying_results/data", df)
