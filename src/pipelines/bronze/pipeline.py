@@ -23,10 +23,10 @@ class BronzePipeline:
         """
         logging.info(f"Extracting data from {DATA_START_BACKFILL} to {DATA_END_BACKFILL}")
 
-        df_races = self._extract_races_data()
-        df_results = self._extract_results_data()
-        df_qualifying = self._extract_qualifying_results_data()
-        df_constructors = self._extract_constructors_data()
+        self._extract_races_data()
+        self._extract_results_data()
+        self._extract_qualifying_results_data()
+        self._extract_constructors_data()
 
     def _write_bronze_data(self, path: str, filename: str, df: pd.DataFrame) -> None:
         """
