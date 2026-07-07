@@ -22,7 +22,6 @@ class BronzePipeline:
         Build the bronze data from the raw data.
         """
         logging.info(f"Extracting data from {DATA_START_BACKFILL} to {DATA_END_BACKFILL}")
-
         self._extract_races_data()
         self._extract_results_data()
         self._extract_qualifying_results_data()

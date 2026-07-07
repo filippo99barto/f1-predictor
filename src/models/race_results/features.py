@@ -18,13 +18,14 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     df = add_constructor_median_season_position(df)
     df = add_driver_grid_season_median(df)
 
+    df = add_gap_to_pole_position(df)
+
     return df
 
 def transform_data(df: pd.DataFrame) -> pd.DataFrame:
     """Transform the data."""
 
     df = df.dropna(subset=["grid"])
-    #df = df[df["status"].isin(["Finished", "Lapped", "+1 Lap", "+2 Laps"])]
 
     return df
 
@@ -162,5 +163,16 @@ def add_driver_grid_season_median(df: pd.DataFrame) -> pd.DataFrame:
         df.groupby(["driverId", "season"])["grid"]
         .transform(lambda s: s.shift(1).expanding(min_periods=1).median())
         .fillna(df["grid"]) # fill na with grid position
+    )
+    return df
+
+def add_gap_to_pole_position(df: pd.DataFrame) -> pd.DataFrame:
+    """Add the gap to pole position feature."""
+
+    df["best_q_seconds"] = df[["q1_seconds", "q2_seconds", "q3_seconds"]].min(axis=1)
+
+    df["qualifying_gap_to_pole"] = (
+        df.groupby(["season", "round"])["best_q_seconds"]
+        .transform(lambda s: s - s.min())
     )
     return df

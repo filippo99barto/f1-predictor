@@ -2,10 +2,13 @@
   "name": "F1 Predictor",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.12",
   "containerEnv": {
-    "MLFLOW_TRACKING_URI": "sqlite:///${containerWorkspaceFolder}/mlflow.db"
+    "MLFLOW_TRACKING_URI": "sqlite:///${containerWorkspaceFolder}/mlflow.db",
+    "MLFLOW_BACKEND_STORE_URI": "sqlite:///${containerWorkspaceFolder}/mlflow.db",
+    "MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE": "true"
   },
   "postCreateCommand": "pip install -r requirements.txt",
-  "postStartCommand": "mlflow ui",
+  "postStartCommand": "mlflow ui --host 0.0.0.0 --port 5000 --allowed-hosts '*' --cors-allowed-origins '*'",
+  "forwardPorts": [5000],
   "customizations": {
     "vscode": {
       "extensions": [

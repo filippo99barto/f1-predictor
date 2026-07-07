@@ -9,28 +9,31 @@ from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error
 from src.config.paths import LOCAL_MODELS_DIR, MLFLOW_RUNS_DIR
 
-EXPERIMENT_NAME = "f1-race-results-predictor"
-MODEL_NAME = "f1_position_predictor"
+EXPERIMENT_NAME = "f1-qualifying-results-predictor"
+MODEL_NAME = "f1_qualifying_predictor"
 MODEL_TYPE = "XGBRegressor"
 
 HALF_2025_ROUND = 15
 
 FEATURE_COLS = [
-    "grid",
-    "driver_last_race_position",
-    "driver_median_position_last_3_races",
-    "constructor_median_position_last_3_races",
-    "driver_circuit_median_position_last_3_races",
-    "driver_season_median_position",
+    # "driver_last_race_position",
+    # "driver_median_position_last_3_races",
+    # "constructor_median_position_last_3_races",
+    # "driver_circuit_median_position_last_3_races",
+    # "driver_season_median_position",
     "driver_positions_gained_season_median",
     "driver_positions_gained_career_median",
-    "driver_circuit_median_career_position",
-    "constructor_median_season_position",
-    "driver_grid_season_median",
-    "grid_position",
-    "q1_seconds",
-    "q2_seconds",
-    "q3_seconds",
+    # "driver_circuit_median_career_position",
+    # "constructor_median_season_position",
+
+    #"driver_grid_season_median",
+    #"qualifying_gap_to_pole", # THIS IS NOT POSSIBLE TO HAVE AS QUALIGYINF HASNT HAPPENED YET
+    "driver_last_qualifying_position",
+    "last_qualifying_gap_to_pole",
+    "driver_qualifying_season_median",
+    "driver_qualifying_career_median",
+    "driver_qualifying_circuit_median",
+    "constructor_qualifying_season_median",
 ]
 
 XGB_PARAMS = {
@@ -48,8 +51,6 @@ XGB_PARAMS = {
     "reg_lambda": 1,
 }
 
-STATUS_FILTER = ["Finished", "Lapped", "+1 Lap", "+2 Laps"]
-
 def train_model() -> None:
     """Train the model."""
 
@@ -66,11 +67,8 @@ def train_model() -> None:
     df = load_training_data()
     train_df, test_df = split_training_data(df)
 
-    # filter out non-finished races when training
-    train_df = train_df[train_df["status"].isin(STATUS_FILTER)]
-
     x_test = test_df[FEATURE_COLS]
-    y_test = test_df["position"]
+    y_test = test_df["grid_position"]
 
     model = Pipeline([("reg", XGBRegressor(**XGB_PARAMS))])
 
@@ -78,7 +76,6 @@ def train_model() -> None:
         mlflow.log_param("xgb_params", XGB_PARAMS)
         mlflow.log_param("model_type", MODEL_TYPE)
         mlflow.log_param(f"train_split", f"seasons < 2025 + 2025 rounds 1-{HALF_2025_ROUND}")
-        mlflow.log_param("status", STATUS_FILTER)
         mlflow.log_param("features", FEATURE_COLS)
 
         val_df = train_df[(train_df["season"] == 2025) & (train_df["round"] >= 5)]
@@ -86,15 +83,16 @@ def train_model() -> None:
 
         model.fit(
             fit_df[FEATURE_COLS],
-            fit_df["position"],
-            reg__eval_set=[(val_df[FEATURE_COLS], val_df["position"])],
+            fit_df["grid_position"],
+            reg__eval_set=[(val_df[FEATURE_COLS], val_df["grid_position"])],
             reg__verbose=True
         )
 
         y_pred = model.predict(x_test)       
 
 
-        baseline_model = mean_absolute_error(y_test, x_test["grid"])
+        
+        baseline_model = mean_absolute_error(y_test, x_test["driver_last_qualifying_position"])
         best_iter = model.named_steps["reg"].best_iteration
         mae = mean_absolute_error(y_test, y_pred)
         top10_mask = y_test <= 10
@@ -119,7 +117,7 @@ def train_model() -> None:
             skops_trusted_types=["xgboost.sklearn.XGBRegressor", "xgboost.core.Booster"]
         )
 
-        joblib.dump(model, LOCAL_MODELS_DIR / "race_results" / f"{MODEL_NAME}.pkl")
+        joblib.dump(model, LOCAL_MODELS_DIR / "qualifying_results" / f"{MODEL_NAME}.pkl")
 
 
 def load_training_data() -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
