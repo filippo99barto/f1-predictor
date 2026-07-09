@@ -4,7 +4,6 @@ import numpy as np
 import joblib
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import HistGradientBoostingRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error
 from src.config.paths import LOCAL_MODELS_DIR, MLFLOW_RUNS_DIR
@@ -16,7 +15,7 @@ MODEL_TYPE = "XGBRegressor"
 HALF_2025_ROUND = 15
 
 FEATURE_COLS = [
-    "grid",
+    "starting_position",
     "driver_last_race_position",
     "driver_median_position_last_3_races",
     "constructor_median_position_last_3_races",
@@ -26,11 +25,11 @@ FEATURE_COLS = [
     "driver_positions_gained_career_median",
     "driver_circuit_median_career_position",
     "constructor_median_season_position",
-    "driver_grid_season_median",
-    "grid_position",
-    "q1_seconds",
-    "q2_seconds",
-    "q3_seconds",
+    "driver_starting_position_season_median",
+    "qualifying_position",
+    # "q1_seconds",
+    # "q2_seconds",
+    # "q3_seconds",
 ]
 
 XGB_PARAMS = {
@@ -94,7 +93,7 @@ def train_model() -> None:
         y_pred = model.predict(x_test)       
 
 
-        baseline_model = mean_absolute_error(y_test, x_test["grid"])
+        baseline_model = mean_absolute_error(y_test, x_test["starting_position"])
         best_iter = model.named_steps["reg"].best_iteration
         mae = mean_absolute_error(y_test, y_pred)
         top10_mask = y_test <= 10

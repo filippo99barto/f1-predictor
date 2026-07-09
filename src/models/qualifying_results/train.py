@@ -4,7 +4,6 @@ import numpy as np
 import joblib
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import HistGradientBoostingRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error
 from src.config.paths import LOCAL_MODELS_DIR, MLFLOW_RUNS_DIR
@@ -16,18 +15,8 @@ MODEL_TYPE = "XGBRegressor"
 HALF_2025_ROUND = 15
 
 FEATURE_COLS = [
-    # "driver_last_race_position",
-    # "driver_median_position_last_3_races",
-    # "constructor_median_position_last_3_races",
-    # "driver_circuit_median_position_last_3_races",
-    # "driver_season_median_position",
     "driver_positions_gained_season_median",
     "driver_positions_gained_career_median",
-    # "driver_circuit_median_career_position",
-    # "constructor_median_season_position",
-
-    #"driver_grid_season_median",
-    #"qualifying_gap_to_pole", # THIS IS NOT POSSIBLE TO HAVE AS QUALIGYINF HASNT HAPPENED YET
     "driver_last_qualifying_position",
     "last_qualifying_gap_to_pole",
     "driver_qualifying_season_median",
@@ -68,7 +57,7 @@ def train_model() -> None:
     train_df, test_df = split_training_data(df)
 
     x_test = test_df[FEATURE_COLS]
-    y_test = test_df["grid_position"]
+    y_test = test_df["qualifying_position"]
 
     model = Pipeline([("reg", XGBRegressor(**XGB_PARAMS))])
 
@@ -83,8 +72,8 @@ def train_model() -> None:
 
         model.fit(
             fit_df[FEATURE_COLS],
-            fit_df["grid_position"],
-            reg__eval_set=[(val_df[FEATURE_COLS], val_df["grid_position"])],
+            fit_df["qualifying_position"],
+            reg__eval_set=[(val_df[FEATURE_COLS], val_df["qualifying_position"])],
             reg__verbose=True
         )
 
@@ -127,7 +116,7 @@ def load_training_data() -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
     from src.config.paths import LOCAL_DATA_DIR
 
     storage_backend = LocalStorageBackend(LOCAL_DATA_DIR)
-    df = storage_backend.read("gold/race_results")
+    df = storage_backend.read("gold/qualifying_results")
 
     df = df.dropna(subset=FEATURE_COLS)
 

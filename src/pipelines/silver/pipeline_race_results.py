@@ -10,27 +10,31 @@ class SilverPipelineRaceResults:
         """
         Build the silver data from the bronze data.
         """
-        df_races, df_results = self._read_bronze_data()
-        df = self._transform_bronze_data(df_races, df_results)
-        df = self._validate_silver_schema(df)
+        df = self._read_bronze_data()
+        df = self._transform_bronze_data(df)
+        
+        self._validate_silver_schema(df)
         self._write_silver_data(df)
 
         return df
 
-    def _read_bronze_data(self) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def _read_bronze_data(self) -> pd.DataFrame:
         """
         Read the bronze data.
         """
         df_races = self.storage_backend.read("bronze/races")
         df_results = self.storage_backend.read("bronze/race_results")
-        return df_races, df_results
+        return df_races.merge(df_results, on=["season", "round"], how="inner")
     
-    def _transform_bronze_data(self, df_races: pd.DataFrame, df_results: pd.DataFrame) -> pd.DataFrame:
+    def _transform_bronze_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Transform the bronze data."""
 
-        df = df_races.merge(df_results, on=["season", "round"], how="inner")
-        df = df.rename(columns=lambda col: col.split(".")[-1])
-        df["grid"] = df["grid"].replace(0, pd.NA)
+        df = (
+            df.rename(columns=lambda col: col.split(".")[-1])
+            .rename(columns={"grid": "starting_position"})
+        )
+        df["starting_position"] = df["starting_position"].replace(0, pd.NA)
+
         schema_columns = list(SilverSchemaRaceResults.to_schema().columns)
 
         return df[schema_columns]
