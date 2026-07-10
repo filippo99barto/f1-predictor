@@ -1,27 +1,5 @@
 import pandas as pd
 
-def build_all_constructor_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Add constructor features to the dataframe."""
-
-    df = build_all_constructor_features_race_results(df)
-    df = build_all_constructor_features_qualifying_results(df)
-
-    return df
-
-def build_all_constructor_features_race_results(df: pd.DataFrame) -> pd.DataFrame:
-    """Add constructor features to the dataframe."""
-
-    df = add_constructor_median_position_previous_3_races(df)
-    df = add_constructor_median_season_position(df)
-
-    return df
-
-def build_all_constructor_features_qualifying_results(df: pd.DataFrame) -> pd.DataFrame:
-    """Add constructor features to the dataframe."""
-
-    df = add_constructor_qualifying_season_median(df)
-
-    return df
 
 def add_constructor_median_position_previous_3_races(df: pd.DataFrame) -> pd.DataFrame:
     """Add the constructor median position last 3 races feature."""
@@ -46,6 +24,7 @@ def add_constructor_median_position_previous_3_races(df: pd.DataFrame) -> pd.Dat
     )
     return df
 
+
 def add_constructor_median_season_position(df: pd.DataFrame) -> pd.DataFrame:
     """Add the constructor season median position feature."""
 
@@ -55,15 +34,15 @@ def add_constructor_median_season_position(df: pd.DataFrame) -> pd.DataFrame:
         df.groupby(["constructorId", "season", "round"], as_index=False)
         .agg(
             team_position=("position", "mean"),
-            team_starting_position=("starting_position", "mean")
-        ) 
+            team_starting_position=("starting_position", "mean"),
+        )
         .sort_values(["constructorId", "season", "round"])
     )
 
     team_race["constructor_median_season_position"] = (
         team_race.groupby("constructorId")["team_position"]
         .transform(lambda s: s.shift(1).expanding(min_periods=1).median())
-        .fillna(team_race["team_starting_position"]) # fill na with team starting_position position
+        .fillna(team_race["team_starting_position"])  # fill na with team starting_position position
     )
 
     df = df.merge(
@@ -73,9 +52,10 @@ def add_constructor_median_season_position(df: pd.DataFrame) -> pd.DataFrame:
     )
     return df
 
+
 def add_constructor_qualifying_season_median(df: pd.DataFrame) -> pd.DataFrame:
     """Add the constructor's qualifying season median feature."""
-    
+
     df = df.sort_values(["constructorId", "season", "round"])
 
     team_qualifying = (
@@ -83,7 +63,7 @@ def add_constructor_qualifying_season_median(df: pd.DataFrame) -> pd.DataFrame:
         .agg(
             team_position=("qualifying_position", "mean"),
             team_career_median=("driver_qualifying_career_median", "mean"),
-        ) 
+        )
         .sort_values(["constructorId", "season", "round"])
     )
 

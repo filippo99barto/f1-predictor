@@ -1,38 +1,5 @@
 import pandas as pd
 
-def build_all_driver_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Add driver features to the dataframe."""
-    
-    df = build_all_driver_features_race_results(df)
-    df = build_all_driver_features_qualifying_results(df)
-
-    return df
-
-def build_all_driver_features_race_results(df: pd.DataFrame) -> pd.DataFrame:
-    """Add driver features to the dataframe."""
-
-    df = add_driver_previous_race_position(df)
-    df = add_driver_median_position_previous_3_races(df)
-    df = add_driver_circuit_median_position_previous_3_races(df)
-    df = add_driver_circuit_median_career_position(df)
-    df = add_driver_season_mediam_position(df)
-    df = add_driver_positions_gained_season_median(df)
-    df = add_driver_positions_gained_career_median(df)
-    df = add_driver_starting_position_season_median(df)
-
-    return df
-
-def build_all_driver_features_qualifying_results(df: pd.DataFrame) -> pd.DataFrame:
-    """Add driver features to the dataframe."""
-
-    df = add_driver_qualifying_gap_to_pole(df)
-    df = add_driver_qualifying_career_median(df)
-    df = add_driver_previous_qualifying_position(df)
-    df = add_driver_previous_qualifying_gap_to_pole(df)
-    df = add_driver_qualifying_season_median(df)
-    df = add_driver_qualifying_circuit_median(df)
-
-    return df
 
 def add_driver_previous_race_position(df: pd.DataFrame) -> pd.DataFrame:
     """Add the driver last race position feature."""
@@ -120,18 +87,6 @@ def add_driver_starting_position_season_median(df: pd.DataFrame) -> pd.DataFrame
         .transform(lambda s: s.shift(1).expanding(min_periods=1).median())
         .fillna(df["starting_position"]) # fill na with starting_position position
     )
-    return df
-
-def add_driver_qualifying_gap_to_pole(df: pd.DataFrame) -> pd.DataFrame:
-    """Gap in seconds between each driver's best quali lap and pole in this race."""
-    
-    df["best_q_seconds"] = df[["q1_seconds", "q2_seconds", "q3_seconds"]].min(axis=1)
-    
-    df["C"] = (
-        df.groupby(["season", "round"])["best_q_seconds"]
-        .transform(lambda s: s - s.min())
-    )
-    
     return df
 
 def add_driver_previous_qualifying_position(df: pd.DataFrame) -> pd.DataFrame:
