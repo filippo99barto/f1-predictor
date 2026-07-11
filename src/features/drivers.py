@@ -39,7 +39,9 @@ def add_driver_circuit_median_position_previous_3_races(df: pd.DataFrame) -> pd.
     df = df.sort_values(["driverId", "circuitId", "season", "round"])
     df["driver_circuit_median_position_last_3_races"] = (
         df.groupby(["driverId", "circuitId"])["position"]
-        .transform(lambda s: s.shift(1).rolling(3, min_periods=1).median()))
+        .transform(lambda s: s.shift(1).rolling(3, min_periods=1).median())
+        .fillna(df["starting_position"]) # fill na with starting_position position
+    )
     return df
 
 def add_driver_positions_gained_season_median(df: pd.DataFrame) -> pd.DataFrame:
