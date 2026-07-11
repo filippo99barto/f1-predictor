@@ -7,3 +7,5 @@ pytest
 pandera
 mlflow
 xgboost
+google-genai
+python-dotenv

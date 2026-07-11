@@ -1,11 +1,10 @@
-import joblib
 import mlflow
-import mlflow.sklearn
 import numpy as np
 import pandas as pd
 from typing import Literal
 
-from src.config.paths import LOCAL_MODELS_DIR, MLFLOW_RUNS_DIR
+from src.config.paths import MLFLOW_RUNS_DIR
+from src.models.cascade.load import load_model
 from src.models.qualifying_results.train import (
     CONFIG as QUALIFYING_CONFIG,
     FEATURE_COLS as QUALIFYING_FEATURE_COLS,
@@ -38,13 +37,6 @@ def _get_holdout_test(
     return test_df
 
 
-def _load_model(model_name: str, model_subdir: str, mode: Literal["dev", "production"]):
-    if mode == "dev":
-        path = LOCAL_MODELS_DIR / model_subdir / f"{model_name}-dev.pkl"
-        return joblib.load(path)
-    return mlflow.sklearn.load_model(f"models:/{model_name}/latest")
-
-
 def evaluate_cascade(
     mode: Literal["dev", "production"] = "dev",
     holdout_fraction: float = 0.5,
@@ -59,10 +51,10 @@ def evaluate_cascade(
         )
     mlflow.set_experiment(EXPERIMENT_NAME)
 
-    qualy_model = _load_model(
+    qualy_model = load_model(
         QUALIFYING_MODEL_NAME, QUALIFYING_CONFIG.model_subdir, mode
     )
-    race_model = _load_model(RACE_MODEL_NAME, RACE_CONFIG.model_subdir, mode)
+    race_model = load_model(RACE_MODEL_NAME, RACE_CONFIG.model_subdir, mode)
 
     test_qualy = _get_holdout_test(load_qualifying_data(), mode, holdout_fraction)
     test_race = _get_holdout_test(load_race_data(), mode, holdout_fraction)
