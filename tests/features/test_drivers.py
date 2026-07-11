@@ -50,9 +50,7 @@ def test_add_driver_season_mediam_position(race_df: pd.DataFrame):
 def test_add_driver_circuit_median_position_previous_3_races(race_df: pd.DataFrame):
     result = add_driver_circuit_median_position_previous_3_races(race_df)
 
-    assert math.isnan(
-        row_value(result, "driver_a", 1, "driver_circuit_median_position_last_3_races")
-    )
+    assert row_value(result, "driver_a", 1, "driver_circuit_median_position_last_3_races") == 2
     assert row_value(result, "driver_a", 3, "driver_circuit_median_position_last_3_races") == 3
     assert row_value(result, "driver_b", 3, "driver_circuit_median_position_last_3_races") == 1
 
