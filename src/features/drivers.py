@@ -8,7 +8,7 @@ def add_driver_previous_race_position(df: pd.DataFrame) -> pd.DataFrame:
     df["driver_last_race_position"] = (
         df.groupby("driverId")["position"]
         .shift(1)
-        .fillna(df["starting_position"]) # fill na with starting_position position
+        .fillna(df["qualifying_position"])
     )
     return df
 
@@ -28,7 +28,7 @@ def add_driver_season_mediam_position(df: pd.DataFrame) -> pd.DataFrame:
     df["driver_season_median_position"] = (
         df.groupby(["driverId", "season"])["position"]
         .transform(lambda s: s.shift(1).expanding(min_periods=1).median())
-        .fillna(df["starting_position"]) # fill na with starting_position position
+        .fillna(df["qualifying_position"])
     )
     return df
 
@@ -40,7 +40,7 @@ def add_driver_circuit_median_position_previous_3_races(df: pd.DataFrame) -> pd.
     df["driver_circuit_median_position_last_3_races"] = (
         df.groupby(["driverId", "circuitId"])["position"]
         .transform(lambda s: s.shift(1).rolling(3, min_periods=1).median())
-        .fillna(df["starting_position"]) # fill na with starting_position position
+        .fillna(df["qualifying_position"])
     )
     return df
 
@@ -76,18 +76,7 @@ def add_driver_circuit_median_career_position(df: pd.DataFrame) -> pd.DataFrame:
     df["driver_circuit_median_career_position"] = (
         df.groupby(["driverId", "circuitId"])["position"]
         .transform(lambda s: s.shift(1).expanding(min_periods=1).median())
-        .fillna(df["starting_position"]) # fill na with starting_position position
-    )
-    return df
-
-def add_driver_starting_position_season_median(df: pd.DataFrame) -> pd.DataFrame:
-    """Add the driver starting_position season median feature."""
-
-    df = df.sort_values(["driverId", "season", "round"])
-    df["driver_starting_position_season_median"] = (
-        df.groupby(["driverId", "season"])["starting_position"]
-        .transform(lambda s: s.shift(1).expanding(min_periods=1).median())
-        .fillna(df["starting_position"]) # fill na with starting_position position
+        .fillna(df["qualifying_position"])
     )
     return df
 

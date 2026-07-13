@@ -2,7 +2,6 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Literal
 
-import numpy as np
 import pandas as pd
 
 from src.inference.next_race import (
@@ -55,7 +54,6 @@ class PredictionResult:
                 "driver_name": format_driver_id(row["driverId"]),
                 "constructor_id": row["constructorId"],
                 "predicted_qualifying_position": float(row["predicted_qualifying_position"]),
-                "predicted_starting_position": int(row["predicted_starting_position"]),
                 "predicted_race_position": float(row["predicted_race_position"]),
             })
 
@@ -107,7 +105,7 @@ def predict_next_race(
     target_qualy = qualy_features[target_race_mask(
         qualy_features, race_info.season, race_info.round
     )]
-    target_qualy = _predictable_rows(target_qualy, QUALIFYING_FEATURE_COLS)
+    target_qualy = _predictable_rows(target_qualy, QUALIFYING_FEATURE_COLS, stage="qualifying")
 
     if target_qualy.empty:
         raise ValueError("No drivers with complete qualifying features for target race.")
@@ -115,29 +113,20 @@ def predict_next_race(
     qualy_pred = qualy_model.predict(target_qualy[QUALIFYING_FEATURE_COLS])
     qualy_predictions = target_qualy[MERGE_KEYS].assign(
         predicted_qualifying_position=qualy_pred,
-        predicted_starting_position=np.round(qualy_pred).clip(1, 20).astype(int),
     )
 
     merged_for_race = merged.copy()
     target_mask = target_race_mask(merged_for_race, race_info.season, race_info.round)
-    pred_lookup = qualy_predictions.set_index(["driverId"])[[
-        "predicted_qualifying_position",
-        "predicted_starting_position",
-    ]]
-    for driver_id, row in pred_lookup.iterrows():
+    quali_lookup = qualy_predictions.set_index("driverId")["predicted_qualifying_position"]
+    for driver_id, predicted_quali in quali_lookup.items():
         driver_mask = target_mask & (merged_for_race["driverId"] == driver_id)
-        merged_for_race.loc[driver_mask, "qualifying_position"] = float(
-            row["predicted_qualifying_position"]
-        )
-        merged_for_race.loc[driver_mask, "starting_position"] = int(
-            row["predicted_starting_position"]
-        )
+        merged_for_race.loc[driver_mask, "qualifying_position"] = float(predicted_quali)
 
     race_features = build_race_results_features(merged_for_race, for_inference=True)
     target_race = race_features[target_race_mask(
         race_features, race_info.season, race_info.round
     )]
-    target_race = _predictable_rows(target_race, RACE_FEATURE_COLS)
+    target_race = _predictable_rows(target_race, RACE_FEATURE_COLS, stage="race")
 
     if target_race.empty:
         raise ValueError("No drivers with complete race features for target race.")
@@ -149,9 +138,7 @@ def predict_next_race(
 
     predictions = target_race[["driverId", "constructorId"]].copy()
     predictions = predictions.merge(
-        qualy_predictions[
-            ["driverId", "predicted_qualifying_position", "predicted_starting_position"]
-        ],
+        qualy_predictions[["driverId", "predicted_qualifying_position"]],
         on="driverId",
         how="left",
     )

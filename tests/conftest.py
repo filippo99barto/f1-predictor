@@ -13,6 +13,7 @@ def race_df() -> pd.DataFrame:
             "round": 1,
             "position": 3,
             "starting_position": 2,
+            "qualifying_position": 2,
         },
         {
             "driverId": "driver_a",
@@ -22,6 +23,7 @@ def race_df() -> pd.DataFrame:
             "round": 2,
             "position": 1,
             "starting_position": 1,
+            "qualifying_position": 1,
         },
         {
             "driverId": "driver_a",
@@ -31,6 +33,7 @@ def race_df() -> pd.DataFrame:
             "round": 3,
             "position": 2,
             "starting_position": 3,
+            "qualifying_position": 3,
         },
         {
             "driverId": "driver_b",
@@ -40,6 +43,7 @@ def race_df() -> pd.DataFrame:
             "round": 1,
             "position": 1,
             "starting_position": 1,
+            "qualifying_position": 1,
         },
         {
             "driverId": "driver_b",
@@ -49,6 +53,7 @@ def race_df() -> pd.DataFrame:
             "round": 2,
             "position": 4,
             "starting_position": 5,
+            "qualifying_position": 3,
         },
         {
             "driverId": "driver_b",
@@ -58,6 +63,7 @@ def race_df() -> pd.DataFrame:
             "round": 3,
             "position": 5,
             "starting_position": 4,
+            "qualifying_position": 4,
         },
         {
             "driverId": "driver_c",
@@ -67,6 +73,7 @@ def race_df() -> pd.DataFrame:
             "round": 1,
             "position": 2,
             "starting_position": 3,
+            "qualifying_position": 3,
         },
         {
             "driverId": "driver_c",
@@ -76,6 +83,7 @@ def race_df() -> pd.DataFrame:
             "round": 2,
             "position": 3,
             "starting_position": 2,
+            "qualifying_position": 2,
         },
     ])
 

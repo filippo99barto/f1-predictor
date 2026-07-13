@@ -10,7 +10,7 @@ EXPERIMENT_NAME = "f1-race-results-predictor"
 MODEL_NAME = "f1_position_predictor"
 
 FEATURE_COLS = [
-    "starting_position",
+    "qualifying_position",
     "driver_last_race_position",
     "driver_median_position_last_3_races",
     "constructor_median_position_last_3_races",
@@ -20,8 +20,7 @@ FEATURE_COLS = [
     "driver_positions_gained_career_median",
     "driver_circuit_median_career_position",
     "constructor_median_season_position",
-    "driver_starting_position_season_median",
-    "qualifying_position",
+    "driver_qualifying_season_median",
 ]
 
 XGB_PARAMS = {
@@ -48,7 +47,7 @@ CONFIG = ModelTrainConfig(
     model_subdir="race_results",
     feature_cols=FEATURE_COLS,
     target_col="position",
-    baseline_col="starting_position",
+    baseline_col="qualifying_position",
     xgb_params=XGB_PARAMS,
     train_row_filter=lambda df: df[df["status"].isin(STATUS_FILTER)],
 )

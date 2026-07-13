@@ -16,7 +16,6 @@ from src.features.drivers import (
     add_driver_qualifying_circuit_median,
     add_driver_qualifying_season_median,
     add_driver_season_mediam_position,
-    add_driver_starting_position_season_median,
 )
 from tests.conftest import row_value
 
@@ -76,15 +75,7 @@ def test_add_driver_circuit_median_career_position(race_df: pd.DataFrame):
 
     assert row_value(result, "driver_a", 1, "driver_circuit_median_career_position") == 2
     assert row_value(result, "driver_a", 3, "driver_circuit_median_career_position") == 3
-    assert row_value(result, "driver_b", 2, "driver_circuit_median_career_position") == 5
-
-
-def test_add_driver_starting_position_season_median(race_df: pd.DataFrame):
-    result = add_driver_starting_position_season_median(race_df)
-
-    assert row_value(result, "driver_a", 1, "driver_starting_position_season_median") == 2
-    assert row_value(result, "driver_a", 3, "driver_starting_position_season_median") == pytest.approx(1.5)
-    assert row_value(result, "driver_b", 3, "driver_starting_position_season_median") == 3
+    assert row_value(result, "driver_b", 2, "driver_circuit_median_career_position") == 3
 
 
 def test_add_driver_qualifying_career_median(quali_df: pd.DataFrame):

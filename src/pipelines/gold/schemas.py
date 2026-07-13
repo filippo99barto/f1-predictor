@@ -11,7 +11,7 @@ class GoldSchemaRaceResults(pa.DataFrameModel):
     driverId: Series[str]
     constructorId: Series[str]
     #features
-    starting_position: Series[int] = pa.Field(ge=1)
+    starting_position: Series[int] = pa.Field(ge=1, nullable=True)
     qualifying_position: Series[int] = pa.Field(ge=1)
     q1_seconds: Series[float] = pa.Field(ge=1, nullable=True)
     q2_seconds: Series[float] = pa.Field(ge=1, nullable=True)
@@ -24,9 +24,9 @@ class GoldSchemaRaceResults(pa.DataFrameModel):
     driver_season_median_position: Series[float] = pa.Field(ge=1)
     driver_positions_gained_season_median: Series[float]
     driver_positions_gained_career_median: Series[float]
-    driver_circuit_median_career_position: Series[float] = pa.Field(ge=1)
+    driver_circuit_median_career_position: Series[float] = pa.Field(ge=1, nullable=True)
     constructor_median_season_position: Series[float] = pa.Field(ge=1)
-    driver_starting_position_season_median: Series[float] = pa.Field(ge=1)
+    driver_qualifying_season_median: Series[float] = pa.Field(ge=1, nullable=True)
 
     class Config:
         strict = True

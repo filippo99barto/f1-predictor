@@ -1,5 +1,4 @@
 import mlflow
-import numpy as np
 import pandas as pd
 from typing import Literal
 
@@ -64,13 +63,11 @@ def evaluate_cascade(
 
     qualy_predictions = test_qualy[MERGE_KEYS].assign(
         predicted_qualifying_position=qualy_pred,
-        predicted_starting_position=np.round(qualy_pred).clip(1, 20),
     )
 
     aligned = test_race.merge(qualy_predictions, on=MERGE_KEYS, how="inner")
     race_x = aligned[RACE_FEATURE_COLS].copy()
     race_x["qualifying_position"] = aligned["predicted_qualifying_position"]
-    race_x["starting_position"] = aligned["predicted_starting_position"]
 
     race_pred = race_model.predict(race_x)
     race_metrics = mae_slices(aligned["position"], race_pred)
