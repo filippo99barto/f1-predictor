@@ -74,12 +74,29 @@ class PredictionResult:
         }
 
 
-def _predictable_rows(df: pd.DataFrame, feature_cols: list[str]) -> pd.DataFrame:
-    valid = df.dropna(subset=feature_cols)
-    dropped = len(df) - len(valid)
-    if dropped:
-        logger.warning("Dropped %d drivers with incomplete features.", dropped)
-    return valid
+def _predictable_rows(
+    df: pd.DataFrame,
+    feature_cols: list[str],
+    *,
+    stage: str,
+) -> pd.DataFrame:
+    missing = df[feature_cols].isna()
+    incomplete = missing.any(axis=1)
+    dropped_df = df.loc[incomplete]
+
+    if not dropped_df.empty:
+        for _, row in dropped_df.iterrows():
+            null_cols = missing.loc[row.name]
+            null_features = null_cols[null_cols].index.tolist()
+            logger.warning(
+                "Dropped driver %s (%s) at %s stage: missing %s",
+                row["driverId"],
+                row.get("constructorId", "unknown"),
+                stage,
+                null_features,
+            )
+
+    return df.loc[~incomplete]
 
 
 def predict_next_race(
