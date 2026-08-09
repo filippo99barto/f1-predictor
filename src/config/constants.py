@@ -1,7 +1,4 @@
-import datetime
-
-DATA_START_BACKFILL = 2022
-DATA_END_BACKFILL = datetime.datetime.now().year + 1 
+DATA_START_BACKFILL = 2022  # default start year when bronze extract(backfill=True)
 
 JOLPI_API_URL = "https://api.jolpi.ca/ergast/f1"
 JOLPI_API_LIMIT = 100

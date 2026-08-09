@@ -1,8 +1,8 @@
 # F1 Predictor
 
-Machine learning system that predicts Formula 1 qualifying and race finishing positions, exposed through a natural-language assistant powered by Gemini.
+Predicts Formula 1 qualifying and race finishing positions using XGBoost, exposed through a Gemini assistant that calls the models as tools — never by guessing.
 
-The project ingests historical F1 data from the [Jolpi Ergast API](https://api.jolpi.ca/ergast/f1), engineers driver and constructor features, trains two XGBoost regressors in a qualifying → race cascade, and serves predictions via function-calling tools so the LLM never invents results.
+Data comes from the [Jolpi Ergast API](https://api.jolpi.ca/ergast/f1) (2022–present). Two regressors run in a **qualifying → race cascade**: the quali model predicts grid order, that feeds the race model, and the assistant surfaces the results in natural language.
 
 ## Architecture
 
@@ -18,102 +18,66 @@ flowchart TB
     Cascade --> Assistant[Gemini Assistant]
 ```
 
-**Cascade design:** The race model uses qualifying grid position as its direct grid input. At inference time, grid order is not known — so the qualifying model runs first, its predictions are written into `qualifying_position`, and the race model runs on that augmented frame. This mirrors how the cascade is evaluated in `src/models/cascade/evaluate.py`.
+At inference time grid order is unknown, so the quali model runs first. Its predictions are written into `qualifying_position`, then the race model predicts finishing positions. See `src/models/cascade/predict.py` and `evaluate.py`.
 
-## Data pipeline
+## Pipeline & models
 
-Data is stored locally as JSON under `data/` via a storage abstraction (`src/storage/`). The pipeline follows a medallion layout:
+| Stage | What it does |
+|-------|----------------|
+| **Bronze** | Raw API extracts; incremental (current season) or optional historical backfill |
+| **Silver** | Cleaned tables, Pandera validation |
+| **Gold** | Silver inner-join + engineered features for training |
+| **Quali model** | 8 features → `qualifying_position` |
+| **Race model** | 11 features → `position` (grid input: `qualifying_position` only) |
+| **Cascade** | Quali predictions fed into race model at inference/eval |
 
-| Layer | Purpose | Key paths |
-|-------|---------|-----------|
-| **Bronze** | Raw API extracts, one file per year | `data/bronze/{races,race_results,qualifying_results,constructors}/` |
-| **Silver** | Cleaned, validated tables | `data/silver/{race_results,qualifying_results}/data.json` |
-| **Gold** | Silver + engineered features for training | `data/gold/{race_results,qualifying_results}/data.json` |
+Features live in `src/features/` (shared primitives) and `src/models/*/features.py` (model-specific). All use lag/shift to avoid leakage; missing values on first circuit visits fall back to `qualifying_position`.
 
-### Bronze (`src/pipelines/bronze/pipeline.py`)
+Both models are XGBoost regressors (`reg:absoluteerror`), logged to MLflow with MAE overall and by slice (top 3, top 10, P11+).
 
-Fetches from `https://api.jolpi.ca/ergast/f1` for seasons 2022 through the current year + 1. Extracts races, race results, qualifying results, and constructors.
+| Mode | Split | Output |
+|------|-------|--------|
+| `dev` | Last 50% of rounds in latest season | Local `-dev.pkl` artifacts |
+| `production` | Hold out most recent completed race | Retrain on all data, register in MLflow |
 
-### Silver (`src/pipelines/silver/`)
+## Quick start
 
-- **Race results** — flattens nested API fields, renames `grid` → `starting_position`, treats grid `0` as missing
-- **Qualifying** — parses Q1/Q2/Q3 lap times to seconds, renames `position` → `qualifying_position`
+**Dev container (recommended)** — opens with dependencies, MLflow UI on port 5000 (`sqlite:///mlflow.db`).
 
-Both layers validate with [Pandera](https://pandera.readthedocs.io/) schemas.
+**Manual setup:**
 
-### Gold (`src/pipelines/gold/`)
+```bash
+pip install -r requirements.txt
+```
 
-Inner-joins silver race and qualifying data on `(season, round, driverId, constructorId, circuitId)`, applies model-specific feature builders, and writes training-ready datasets.
+Optional `.env` for the assistant:
 
-## Feature engineering
+```
+GEMINI_API_KEY=your_key_here
+```
 
-Features are split into reusable primitives and model-specific orchestration.
+**Train end-to-end** — run `notebooks/train.ipynb` (bronze → silver → gold → train → cascade eval).
 
-### Shared primitives (`src/features/`)
+Bronze API (defaults to current season only; silver reads all years already on disk):
 
-Atomic, entity-level functions with no model coupling. All use lag/shift to avoid target leakage:
+```python
+bronze_pipeline.extract_bronze_data()  # current season
+bronze_pipeline.extract_bronze_data(backfill=True)  # DATA_START_BACKFILL → now
+bronze_pipeline.extract_bronze_data(backfill=True, start_backfill_year=2024)
+```
 
-- **`drivers.py`** — recent form (last race, rolling 3-race median, season/circuit medians), positions gained, qualifying history
-- **`constructors.py`** — team-level position aggregates (rolling and season medians)
+Uncomment production lines in the notebook to register models.
 
-### Model orchestration (`src/models/*/features.py`)
-
-| Module | Target | Role |
-|--------|--------|------|
-| `qualifying_results/features.py` | `qualifying_position` | Composes 7 driver + 1 constructor quali features |
-| `race_results/features.py` | `position` | Composes 9 driver + 2 constructor race features |
-
-Both builders accept `for_inference=False` (default — drops rows without a target) or `for_inference=True` (keeps scaffold rows for upcoming races).
-
-Missing values on first circuit visits are filled with sensible fallbacks (e.g. `qualifying_position`) so rookies and new circuits don't break inference.
-
-## Models
-
-Both models are **XGBoost regressors** (`reg:absoluteerror`) wrapped in sklearn `Pipeline`, trained via the shared module in `src/models/training/`.
-
-| | Qualifying | Race |
-|---|-----------|------|
-| Experiment | `f1-qualifying-results-predictor` | `f1-race-results-predictor` |
-| Registered name | `f1_qualifying_predictor` | `f1_position_predictor` |
-| Target | `qualifying_position` | `position` |
-| Baseline | `driver_last_qualifying_position` | `qualifying_position` |
-| Features | 8 | 11 (`qualifying_position` only for grid) |
-| Train filter | all rows | finished/lapped statuses only |
-
-Hyperparameters: 500 trees, learning rate 0.1, max depth 6, early stopping (10 rounds). Metrics logged to MLflow include overall MAE plus slices (top 3, top 10, P11+).
-
-### Training modes
-
-| Mode | Split strategy | Use case |
-|------|---------------|----------|
-| `dev` | Last 50% of rounds in the latest season | Hyperparameter tuning, fast iteration |
-| `production` | Hold out the single most recent completed race | Final evaluation and registry |
-
-In `dev` mode, models are saved locally as `.pkl` files. In `production` mode, models are retrained on all data and registered in MLflow.
-
-## Inference
+**Predict:**
 
 ```python
 from src.models.cascade.predict import predict_next_race
 
 result = predict_next_race(mode="production")
 print(result.winner, result.podium)
-print(result.to_dict(top_n=10))
 ```
 
-**How it works** (`src/inference/next_race.py` + `src/models/cascade/predict.py`):
-
-1. **Resolve target race** — next race on the calendar after the last completed race in gold data, or an explicit `season`/`round`
-2. **Build lineup** — 22 drivers from the most recent completed race before the target
-3. **Scaffold rows** — placeholder entries with `NaN` results for the target race
-4. **Qualifying prediction** — features built from silver history + scaffold, quali model predicts grid
-5. **Race prediction** — predicted qualifying position injected into the frame, race model predicts finishing positions
-
-Drivers with incomplete features are dropped with a warning. The result includes predicted qualifying and race positions per driver.
-
-## Assistant
-
-A Gemini-powered chat layer that answers F1 prediction questions by calling the models as tools — never by guessing.
+**Assistant:**
 
 ```python
 from src.assistant.client import ask
@@ -121,100 +85,64 @@ from src.assistant.client import ask
 answer = ask("Who will win the next race?")
 ```
 
-**Tools** (`src/assistant/tools.py`):
-
-| Tool | Backend |
-|------|---------|
-| `predict_next_race` | Full cascade prediction |
-| `get_next_race_info` | Schedule lookup (name, circuit, date) |
-
-Requires a `GEMINI_API_KEY` in a `.env` file at the project root. Default model: `gemini-3.1-flash-lite`.
-
 See `notebooks/assistant.ipynb` for examples.
 
-## Quick start
-
-### Dev container (recommended)
-
-Open the repo in a VS Code / Cursor dev container. It installs dependencies, configures MLflow (`sqlite:///mlflow.db`), and starts the MLflow UI on port 5000.
-
-### Manual setup
+**Tests:**
 
 ```bash
-pip install -r requirements.txt
+pytest                    # full suite
+pytest tests/features/    # unit tests only (no data/models)
+pytest tests/inference/   # needs local data/ and dev .pkl models
 ```
 
-Create `.env` if you want the assistant:
-
-```
-GEMINI_API_KEY=your_key_here
-```
-
-### Run the full pipeline
-
-Open `notebooks/train.ipynb` and run the single cell. This will:
-
-1. Extract bronze data from the API
-2. Build silver and gold datasets
-3. Train qualifying and race models (`mode="dev"`)
-4. Evaluate the cascade end-to-end
-
-Uncomment the production lines in the notebook to retrain on all data and register models.
-
-### Run tests
-
-```bash
-pytest                          # all tests
-pytest tests/features/          # unit tests only (no data or models needed)
-pytest tests/models/            # race model config and feature builder tests
-pytest tests/inference/         # needs data/ and dev .pkl models
-```
-
-## Project structure
+## Project layout
 
 ```
 f1_predictor/
-├── data/                         # Generated locally (gitignored)
-├── mlruns/                       # MLflow experiment tracking (gitignored)
-├── notebooks/
-│   ├── train.ipynb               # Full pipeline + training
-│   └── assistant.ipynb           # Predictions + Gemini chat
+├── notebooks/          train.ipynb, assistant.ipynb
 ├── src/
-│   ├── assistant/                # Gemini client and tool declarations
-│   ├── config/                   # Paths and API constants
-│   ├── features/                 # Shared driver/constructor feature primitives
-│   ├── inference/                # Next-race schedule, lineup, scaffold logic
-│   ├── models/
-│   │   ├── cascade/              # predict.py, load.py, evaluate.py
-│   │   ├── qualifying_results/   # features.py, train.py
-│   │   ├── race_results/         # features.py, train.py
-│   │   └── training/             # Shared trainer, splits, metrics
-│   ├── pipelines/
-│   │   ├── bronze/               # API extraction
-│   │   ├── silver/               # Cleaning and validation
-│   │   └── gold/                 # Feature engineering for training
-│   └── storage/                  # Local JSON storage backend
+│   ├── assistant/      Gemini client + tools
+│   ├── features/       Driver/constructor feature primitives
+│   ├── inference/      Next-race schedule, lineup, scaffolds
+│   ├── models/         Quali/race train configs, cascade predict/eval
+│   └── pipelines/      Bronze, silver, gold
+├── plans/              Design notes and roadmaps
 └── tests/
-    ├── features/                 # Unit tests for feature functions
-    ├── models/                   # Race model config and feature builder tests
-    ├── inference/                # Schedule/lineup and smoke tests
-    └── assistant/                # API key guard test
 ```
 
 ## Configuration
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `GEMINI_API_KEY` | Gemini assistant | Required for `ask()` |
-| `MLFLOW_TRACKING_URI` | MLflow backend | `sqlite:///mlflow.db` (devcontainer) |
+| Variable | Purpose |
+|----------|---------|
+| `GEMINI_API_KEY` | Required for `ask()` |
+| `MLFLOW_TRACKING_URI` | Default `sqlite:///mlflow.db` in devcontainer |
 
-Data backfill range is set in `src/config/constants.py` (`DATA_START_BACKFILL = 2022`).
+Backfill start year: `src/config/constants.py` (`DATA_START_BACKFILL = 2022`, used when `extract_bronze_data(backfill=True)`).
 
-## Generated artifacts
+**Generated locally (gitignored):** `data/`, `mlruns/`, `mlflow.db`, `src/models/*/*.pkl`, `.env`
 
-These are gitignored and must be produced locally:
+---
 
-- `data/` — run the bronze/silver/gold pipelines
-- `mlruns/`, `mlflow.db` — created during training
-- `src/models/*/*.pkl` — dev model artifacts
-- `.env` — API keys
+## README screenshots (optional)
+
+Add images under `docs/screenshots/` and reference them here to make the project easier to skim. Suggested captures from MLflow UI (`http://localhost:5000`):
+
+| Screenshot | Where in MLflow | Why include it |
+|------------|-----------------|----------------|
+| **Experiments overview** | Home → Experiments list | Shows the three experiments: `f1-qualifying-results-predictor`, `f1-race-results-predictor`, `f1-cascade-predictor` |
+| **Single model run — metrics** | Open a quali or race run → Metrics tab | Chart `mae` vs `baseline_mae`; shows the model beats the naive baseline |
+| **Slice metrics** | Same run → Metrics | `mae_top3`, `mae_top10`, `mae_p11_plus` — demonstrates performance across the grid, not just overall |
+| **Run parameters** | Same run → Parameters | `features`, `mode`, `split_strategy`, `holdout_fraction` — documents what was trained |
+| **Cascade eval run** | `f1-cascade-predictor` → latest run | All eight metrics (`qualy_mae_*`, `race_mae_*`) on one screen — end-to-end pipeline quality |
+| **Model registry** | Models → Registered Models | Both `f1_qualifying_predictor` and `f1_position_predictor` with version history |
+
+**Nice-to-have:**
+
+- **Compare runs** — overlay two dev runs after a hyperparameter or feature change
+- **Assistant output** — screenshot from `assistant.ipynb` showing a podium prediction (complements MLflow)
+
+Example embed once captured:
+
+```markdown
+![MLflow cascade metrics](docs/screenshots/mlflow-cascade-metrics.png)
+```
