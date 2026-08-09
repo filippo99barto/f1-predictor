@@ -12,7 +12,7 @@ class GoldSchemaRaceResults(pa.DataFrameModel):
     driverId: Series[str]
     constructorId: Series[str]
     # features
-    starting_position: Series[int] = pa.Field(ge=1, nullable=True)
+    starting_position: Series[int] = pa.Field(ge=1)
     qualifying_position: Series[int] = pa.Field(ge=1)
     q1_seconds: Series[float] = pa.Field(ge=1, nullable=True)
     q2_seconds: Series[float] = pa.Field(ge=1, nullable=True)

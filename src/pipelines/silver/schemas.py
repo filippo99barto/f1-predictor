@@ -8,7 +8,7 @@ class SilverSchemaRaceResults(pa.DataFrameModel):
     circuitId: Series[str]
     position: Series[int] = pa.Field(ge=1)
     points: Series[float] = pa.Field(ge=0)
-    starting_position: Series[int] = pa.Field(ge=0, nullable=True)
+    starting_position: Series[int] = pa.Field(ge=1)
     status: Series[str]
     driverId: Series[str]
     constructorId: Series[str]

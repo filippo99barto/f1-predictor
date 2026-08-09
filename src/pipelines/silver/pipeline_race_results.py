@@ -34,11 +34,17 @@ class SilverPipelineRaceResults:
         df = df.rename(columns=lambda col: col.split(".")[-1]).rename(
             columns={"grid": "starting_position"}
         )
-        df["starting_position"] = df["starting_position"].replace(0, pd.NA)
+        df["starting_position"] = self._resolve_starting_positions_pitlane_starts(df)
 
         schema_columns = list(SilverSchemaRaceResults.to_schema().columns)
 
         return df[schema_columns]
+
+    @staticmethod
+    def _resolve_starting_positions_pitlane_starts(df: pd.DataFrame) -> pd.Series:
+        grid = pd.to_numeric(df["starting_position"], errors="coerce")
+        grid_field_size = df.groupby(["season", "round"])["driverId"].transform("size")
+        return grid.where(grid != 0, grid_field_size).astype(int)
 
     def _validate_silver_schema(self, df: pd.DataFrame) -> pd.DataFrame:
         """Validate the silver schema."""
