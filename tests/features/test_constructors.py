@@ -19,9 +19,7 @@ def team_value(df: pd.DataFrame, constructor_id: str, round_num: int, column: st
 def test_add_constructor_median_position_previous_3_races(race_df: pd.DataFrame):
     result = add_constructor_median_position_previous_3_races(race_df)
 
-    assert math.isnan(
-        team_value(result, "red_bull", 1, "constructor_median_position_last_3_races")
-    )
+    assert math.isnan(team_value(result, "red_bull", 1, "constructor_median_position_last_3_races"))
     assert team_value(result, "red_bull", 2, "constructor_median_position_last_3_races") == 2
     assert team_value(
         result, "red_bull", 3, "constructor_median_position_last_3_races"
@@ -32,9 +30,13 @@ def test_add_constructor_median_position_previous_3_races(race_df: pd.DataFrame)
 def test_add_constructor_median_season_position(race_df: pd.DataFrame):
     result = add_constructor_median_season_position(race_df)
 
-    assert team_value(result, "red_bull", 1, "constructor_median_season_position") == pytest.approx(1.5)
+    assert team_value(result, "red_bull", 1, "constructor_median_season_position") == pytest.approx(
+        1.5
+    )
     assert team_value(result, "red_bull", 2, "constructor_median_season_position") == 2
-    assert team_value(result, "red_bull", 3, "constructor_median_season_position") == pytest.approx(2.25)
+    assert team_value(result, "red_bull", 3, "constructor_median_season_position") == pytest.approx(
+        2.25
+    )
     assert team_value(result, "ferrari", 1, "constructor_median_season_position") == 3
 
 
@@ -42,8 +44,10 @@ def test_add_constructor_qualifying_season_median(quali_df: pd.DataFrame):
     seeded = add_driver_qualifying_career_median(quali_df)
     result = add_constructor_qualifying_season_median(seeded)
 
-    assert math.isnan(
-        team_value(result, "red_bull", 1, "constructor_qualifying_season_median")
-    )
-    assert team_value(result, "red_bull", 2, "constructor_qualifying_season_median") == pytest.approx(1.5)
-    assert team_value(result, "red_bull", 3, "constructor_qualifying_season_median") == pytest.approx(1.75)
+    assert math.isnan(team_value(result, "red_bull", 1, "constructor_qualifying_season_median"))
+    assert team_value(
+        result, "red_bull", 2, "constructor_qualifying_season_median"
+    ) == pytest.approx(1.5)
+    assert team_value(
+        result, "red_bull", 3, "constructor_qualifying_season_median"
+    ) == pytest.approx(1.75)

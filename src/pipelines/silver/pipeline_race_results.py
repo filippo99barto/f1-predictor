@@ -31,9 +31,8 @@ class SilverPipelineRaceResults:
     def _transform_bronze_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Transform the bronze data."""
 
-        df = (
-            df.rename(columns=lambda col: col.split(".")[-1])
-            .rename(columns={"grid": "starting_position"})
+        df = df.rename(columns=lambda col: col.split(".")[-1]).rename(
+            columns={"grid": "starting_position"}
         )
         df["starting_position"] = df["starting_position"].replace(0, pd.NA)
 

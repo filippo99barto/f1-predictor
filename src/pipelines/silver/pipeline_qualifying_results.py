@@ -32,9 +32,8 @@ class SilverPipelineQualifyingResults:
     def _transform_bronze_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Transform the bronze data."""
 
-        df = (
-            df.rename(columns=lambda col: col.split(".")[-1])
-            .rename(columns={"position": "qualifying_position"})
+        df = df.rename(columns=lambda col: col.split(".")[-1]).rename(
+            columns={"position": "qualifying_position"}
         )
 
         df["q1_seconds"] = df["Q1"].apply(self.parse_lap_time)

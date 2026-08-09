@@ -56,13 +56,15 @@ class PredictionResult:
 
         rows = []
         for _, row in preds.iterrows():
-            rows.append({
-                "driver_id": row["driverId"],
-                "driver_name": format_driver_id(row["driverId"]),
-                "constructor_id": row["constructorId"],
-                "predicted_qualifying_position": float(row["predicted_qualifying_position"]),
-                "predicted_race_position": float(row["predicted_race_position"]),
-            })
+            rows.append(
+                {
+                    "driver_id": row["driverId"],
+                    "driver_name": format_driver_id(row["driverId"]),
+                    "constructor_id": row["constructorId"],
+                    "predicted_qualifying_position": float(row["predicted_qualifying_position"]),
+                    "predicted_race_position": float(row["predicted_race_position"]),
+                }
+            )
 
         return {
             "season": self.season,
@@ -73,10 +75,7 @@ class PredictionResult:
                 "driver_id": self.winner,
                 "driver_name": format_driver_id(self.winner),
             },
-            "podium": [
-                {"driver_id": d, "driver_name": format_driver_id(d)}
-                for d in self.podium
-            ],
+            "podium": [{"driver_id": d, "driver_name": format_driver_id(d)} for d in self.podium],
             "predictions": rows,
         }
 
@@ -120,15 +119,13 @@ def predict_next_race(
         race_info.circuit_id,
     )
 
-    qualy_model = load_model(
-        QUALIFYING_MODEL_NAME, QUALIFYING_CONFIG.model_subdir, mode
-    )
+    qualy_model = load_model(QUALIFYING_MODEL_NAME, QUALIFYING_CONFIG.model_subdir, mode)
     race_model = load_model(RACE_MODEL_NAME, RACE_CONFIG.model_subdir, mode)
 
     qualy_features = build_qualifying_results_features(merged, for_inference=True)
-    target_qualy = qualy_features[target_race_mask(
-        qualy_features, race_info.season, race_info.round
-    )]
+    target_qualy = qualy_features[
+        target_race_mask(qualy_features, race_info.season, race_info.round)
+    ]
     target_qualy = _predictable_rows(target_qualy, QUALIFYING_FEATURE_COLS, stage="qualifying")
 
     if target_qualy.empty:
@@ -147,9 +144,7 @@ def predict_next_race(
         merged_for_race.loc[driver_mask, "qualifying_position"] = float(predicted_quali)
 
     race_features = build_race_results_features(merged_for_race, for_inference=True)
-    target_race = race_features[target_race_mask(
-        race_features, race_info.season, race_info.round
-    )]
+    target_race = race_features[target_race_mask(race_features, race_info.season, race_info.round)]
     target_race = _predictable_rows(target_race, RACE_FEATURE_COLS, stage="race")
 
     if target_race.empty:

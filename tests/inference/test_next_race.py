@@ -21,41 +21,45 @@ TARGET_RACE = RaceInfo(
     date="2026-08-03",
 )
 
-FAKE_SCHEDULE = pd.DataFrame([
-    {
-        "season": 2026,
-        "round": 9,
-        "raceName": "Hungarian Grand Prix",
-        "circuitId": "hungaroring",
-        "date": "2026-07-27",
-    },
-    {
-        "season": 2026,
-        "round": 10,
-        "raceName": "Belgian Grand Prix",
-        "circuitId": "spa",
-        "date": "2026-08-03",
-    },
-    {
-        "season": 2026,
-        "round": 11,
-        "raceName": "Dutch Grand Prix",
-        "circuitId": "zandvoort",
-        "date": "2026-08-17",
-    },
-])
+FAKE_SCHEDULE = pd.DataFrame(
+    [
+        {
+            "season": 2026,
+            "round": 9,
+            "raceName": "Hungarian Grand Prix",
+            "circuitId": "hungaroring",
+            "date": "2026-07-27",
+        },
+        {
+            "season": 2026,
+            "round": 10,
+            "raceName": "Belgian Grand Prix",
+            "circuitId": "spa",
+            "date": "2026-08-03",
+        },
+        {
+            "season": 2026,
+            "round": 11,
+            "raceName": "Dutch Grand Prix",
+            "circuitId": "zandvoort",
+            "date": "2026-08-17",
+        },
+    ]
+)
 
-FAKE_SILVER_RACE_RESULTS = pd.DataFrame([
-    {
-        "season": 2026,
-        "round": 9,
-        "driverId": f"driver_{i:02d}",
-        "constructorId": f"team_{i % 11}",
-        "circuitId": "hungaroring",
-        "position": i + 1,
-    }
-    for i in range(22)
-])
+FAKE_SILVER_RACE_RESULTS = pd.DataFrame(
+    [
+        {
+            "season": 2026,
+            "round": 9,
+            "driverId": f"driver_{i:02d}",
+            "constructorId": f"team_{i % 11}",
+            "circuitId": "hungaroring",
+            "position": i + 1,
+        }
+        for i in range(22)
+    ]
+)
 
 
 def _fake_inference_frames(season: int, round_num: int, circuit_id: str) -> pd.DataFrame:
@@ -63,38 +67,42 @@ def _fake_inference_frames(season: int, round_num: int, circuit_id: str) -> pd.D
     for race_round in range(1, round_num):
         for i in range(22):
             position = float((i % 20) + 1)
-            rows.append({
-                "season": season,
-                "round": race_round,
-                "driverId": f"driver_{i:02d}",
-                "constructorId": f"team_{i % 11}",
-                "circuitId": "hungaroring" if race_round % 2 else "monaco",
-                "position": position,
-                "starting_position": position,
-                "qualifying_position": position,
-                "q1_seconds": 90.0 + i * 0.1,
-                "q2_seconds": 89.0 + i * 0.1,
-                "q3_seconds": 88.0 + i * 0.1,
-                "points": 10.0,
-                "status": "Finished",
-            })
+            rows.append(
+                {
+                    "season": season,
+                    "round": race_round,
+                    "driverId": f"driver_{i:02d}",
+                    "constructorId": f"team_{i % 11}",
+                    "circuitId": "hungaroring" if race_round % 2 else "monaco",
+                    "position": position,
+                    "starting_position": position,
+                    "qualifying_position": position,
+                    "q1_seconds": 90.0 + i * 0.1,
+                    "q2_seconds": 89.0 + i * 0.1,
+                    "q3_seconds": 88.0 + i * 0.1,
+                    "points": 10.0,
+                    "status": "Finished",
+                }
+            )
 
     for i in range(22):
-        rows.append({
-            "season": season,
-            "round": round_num,
-            "driverId": f"driver_{i:02d}",
-            "constructorId": f"team_{i % 11}",
-            "circuitId": circuit_id,
-            "position": float("nan"),
-            "starting_position": float("nan"),
-            "qualifying_position": float("nan"),
-            "q1_seconds": float("nan"),
-            "q2_seconds": float("nan"),
-            "q3_seconds": float("nan"),
-            "points": float("nan"),
-            "status": pd.NA,
-        })
+        rows.append(
+            {
+                "season": season,
+                "round": round_num,
+                "driverId": f"driver_{i:02d}",
+                "constructorId": f"team_{i % 11}",
+                "circuitId": circuit_id,
+                "position": float("nan"),
+                "starting_position": float("nan"),
+                "qualifying_position": float("nan"),
+                "q1_seconds": float("nan"),
+                "q2_seconds": float("nan"),
+                "q3_seconds": float("nan"),
+                "points": float("nan"),
+                "status": pd.NA,
+            }
+        )
 
     return pd.DataFrame(rows)
 

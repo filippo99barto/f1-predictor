@@ -27,7 +27,12 @@ class GoldPipelineRaceResults:
 
         df_race_results = self.storage_backend.read("silver/race_results")
         df_qualifying_results = self.storage_backend.read("silver/qualifying_results")
-        df = pd.merge(df_race_results, df_qualifying_results, on=["season", "round", "driverId", "constructorId", "circuitId"], how="inner")
+        df = pd.merge(
+            df_race_results,
+            df_qualifying_results,
+            on=["season", "round", "driverId", "constructorId", "circuitId"],
+            how="inner",
+        )
 
         return df
 

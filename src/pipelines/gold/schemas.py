@@ -3,7 +3,7 @@ from pandera.typing import Series
 
 
 class GoldSchemaRaceResults(pa.DataFrameModel):
-    #target
+    # target
     position: Series[int] = pa.Field(ge=1)
 
     season: Series[int] = pa.Field(ge=1950)
@@ -11,7 +11,7 @@ class GoldSchemaRaceResults(pa.DataFrameModel):
     status: Series[str]
     driverId: Series[str]
     constructorId: Series[str]
-    #features
+    # features
     starting_position: Series[int] = pa.Field(ge=1, nullable=True)
     qualifying_position: Series[int] = pa.Field(ge=1)
     q1_seconds: Series[float] = pa.Field(ge=1, nullable=True)
@@ -33,15 +33,16 @@ class GoldSchemaRaceResults(pa.DataFrameModel):
         strict = True
         coerce = True
 
+
 class GoldSchemaQualifyingResults(pa.DataFrameModel):
-    #target
+    # target
     qualifying_position: Series[int] = pa.Field(ge=1)
 
     season: Series[int] = pa.Field(ge=1950)
     round: Series[int] = pa.Field(ge=1)
     driverId: Series[str]
     constructorId: Series[str]
-    #features
+    # features
     driver_positions_gained_season_median: Series[float]
     driver_positions_gained_career_median: Series[float]
     driver_last_qualifying_position: Series[float] = pa.Field(ge=1, nullable=True)

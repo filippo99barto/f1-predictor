@@ -12,10 +12,9 @@ def add_constructor_median_position_previous_3_races(df: pd.DataFrame) -> pd.Dat
         .sort_values(["constructorId", "season", "round"])
     )
 
-    team_race["constructor_median_position_last_3_races"] = (
-        team_race.groupby("constructorId")["team_position"]
-        .transform(lambda s: s.shift(1).rolling(3, min_periods=1).median())
-    )
+    team_race["constructor_median_position_last_3_races"] = team_race.groupby("constructorId")[
+        "team_position"
+    ].transform(lambda s: s.shift(1).rolling(3, min_periods=1).median())
 
     df = df.merge(
         team_race[["constructorId", "season", "round", "constructor_median_position_last_3_races"]],
@@ -74,7 +73,9 @@ def add_constructor_qualifying_season_median(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     df = df.merge(
-        team_qualifying[["constructorId", "season", "round", "constructor_qualifying_season_median"]],
+        team_qualifying[
+            ["constructorId", "season", "round", "constructor_qualifying_season_median"]
+        ],
         on=["constructorId", "season", "round"],
         how="left",
     )

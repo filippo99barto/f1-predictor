@@ -65,9 +65,7 @@ def resolve_target_race(
         | ((schedule["season"] == last_season) & (schedule["round"] > last_round))
     ]
     if upcoming.empty:
-        raise ValueError(
-            f"No upcoming race in schedule after {last_season} R{last_round}."
-        )
+        raise ValueError(f"No upcoming race in schedule after {last_season} R{last_round}.")
 
     row = upcoming.iloc[0]
     return RaceInfo(

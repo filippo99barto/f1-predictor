@@ -37,8 +37,7 @@ def ask(question: str, *, model: str | None = None) -> str:
     resolved_model = model or DEFAULT_MODEL
 
     declarations = [
-        types.FunctionDeclaration(**declaration)
-        for declaration in FUNCTION_DECLARATIONS
+        types.FunctionDeclaration(**declaration) for declaration in FUNCTION_DECLARATIONS
     ]
     config = types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT,
@@ -58,9 +57,7 @@ def ask(question: str, *, model: str | None = None) -> str:
         )
         candidate = response.candidates[0].content
         function_calls = [
-            part.function_call
-            for part in candidate.parts
-            if part.function_call is not None
+            part.function_call for part in candidate.parts if part.function_call is not None
         ]
 
         if not function_calls:

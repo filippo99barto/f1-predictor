@@ -63,9 +63,7 @@ def evaluate_cascade(
         )
     mlflow.set_experiment(EXPERIMENT_NAME)
 
-    qualy_model = load_model(
-        QUALIFYING_MODEL_NAME, QUALIFYING_CONFIG.model_subdir, mode
-    )
+    qualy_model = load_model(QUALIFYING_MODEL_NAME, QUALIFYING_CONFIG.model_subdir, mode)
     race_model = load_model(RACE_MODEL_NAME, RACE_CONFIG.model_subdir, mode)
 
     test_qualy = _get_holdout_test(load_qualifying_data(), mode, holdout_fraction)
@@ -92,16 +90,18 @@ def evaluate_cascade(
         if mode == "dev":
             mlflow.log_param("holdout_fraction", holdout_fraction)
 
-        mlflow.log_metrics({
-            "qualy_mae": quali_metrics["mae"],
-            "qualy_mae_top3": quali_metrics["mae_top3"],
-            "qualy_mae_top10": quali_metrics["mae_top10"],
-            "qualy_mae_p11_plus": quali_metrics["mae_p11_plus"],
-            "race_mae": race_metrics["mae"],
-            "race_mae_top3": race_metrics["mae_top3"],
-            "race_mae_top10": race_metrics["mae_top10"],
-            "race_mae_p11_plus": race_metrics["mae_p11_plus"],
-        })
+        mlflow.log_metrics(
+            {
+                "qualy_mae": quali_metrics["mae"],
+                "qualy_mae_top3": quali_metrics["mae_top3"],
+                "qualy_mae_top10": quali_metrics["mae_top10"],
+                "qualy_mae_p11_plus": quali_metrics["mae_p11_plus"],
+                "race_mae": race_metrics["mae"],
+                "race_mae_top3": race_metrics["mae_top3"],
+                "race_mae_top10": race_metrics["mae_top10"],
+                "race_mae_p11_plus": race_metrics["mae_p11_plus"],
+            }
+        )
 
 
 if __name__ == "__main__":

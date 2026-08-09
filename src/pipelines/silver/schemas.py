@@ -17,6 +17,7 @@ class SilverSchemaRaceResults(pa.DataFrameModel):
         strict = True
         coerce = True
 
+
 class SilverSchemaQualifyingResults(pa.DataFrameModel):
     season: Series[int] = pa.Field(ge=1950)
     round: Series[int] = pa.Field(ge=1)

@@ -37,8 +37,7 @@ def split_latest_season_fraction(
     cutoff = holdout_rounds[0]
 
     train_df = df[
-        (df["season"] < max_season)
-        | ((df["season"] == max_season) & (df["round"] < cutoff))
+        (df["season"] < max_season) | ((df["season"] == max_season) & (df["round"] < cutoff))
     ]
     test_df = df[(df["season"] == max_season) & (df["round"].isin(holdout_rounds))]
 
@@ -81,10 +80,8 @@ def get_early_stopping_val_set(
     """Return (fit_df, val_df) using the last n rounds of the max season in train_df."""
     max_season = int(train_df["season"].max())
     season_rounds = _max_season_rounds(train_df, max_season)
-    val_rounds = set(season_rounds[-min(n_rounds, len(season_rounds)):])
+    val_rounds = set(season_rounds[-min(n_rounds, len(season_rounds)) :])
 
-    val_df = train_df[
-        (train_df["season"] == max_season) & (train_df["round"].isin(val_rounds))
-    ]
+    val_df = train_df[(train_df["season"] == max_season) & (train_df["round"].isin(val_rounds))]
     fit_df = train_df[~train_df.index.isin(val_df.index)]
     return fit_df, val_df

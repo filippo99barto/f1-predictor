@@ -35,7 +35,9 @@ def test_add_driver_median_position_previous_3_races(race_df: pd.DataFrame):
     assert math.isnan(row_value(result, "driver_a", 1, "driver_median_position_last_3_races"))
     assert row_value(result, "driver_a", 2, "driver_median_position_last_3_races") == 3
     assert row_value(result, "driver_a", 3, "driver_median_position_last_3_races") == 2
-    assert row_value(result, "driver_b", 3, "driver_median_position_last_3_races") == pytest.approx(2.5)
+    assert row_value(result, "driver_b", 3, "driver_median_position_last_3_races") == pytest.approx(
+        2.5
+    )
 
 
 def test_add_driver_season_mediam_position(race_df: pd.DataFrame):
@@ -59,7 +61,9 @@ def test_add_driver_positions_gained_season_median(race_df: pd.DataFrame):
 
     assert row_value(result, "driver_a", 1, "driver_positions_gained_season_median") == 0
     assert row_value(result, "driver_a", 2, "driver_positions_gained_season_median") == -1
-    assert row_value(result, "driver_a", 3, "driver_positions_gained_season_median") == pytest.approx(-0.5)
+    assert row_value(
+        result, "driver_a", 3, "driver_positions_gained_season_median"
+    ) == pytest.approx(-0.5)
 
 
 def test_add_driver_positions_gained_career_median(race_df: pd.DataFrame):

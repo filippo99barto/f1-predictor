@@ -43,11 +43,7 @@ class BronzePipeline:
 
     @staticmethod
     def _backfill_start_year(start_backfill_year: int | None) -> int:
-        return (
-            start_backfill_year
-            if start_backfill_year is not None
-            else DATA_START_BACKFILL
-        )
+        return start_backfill_year if start_backfill_year is not None else DATA_START_BACKFILL
 
     @staticmethod
     def _resolve_years(
