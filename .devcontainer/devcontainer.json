@@ -6,7 +6,7 @@
     "MLFLOW_BACKEND_STORE_URI": "sqlite:///${containerWorkspaceFolder}/mlflow.db",
     "MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE": "true"
   },
-  "postCreateCommand": "pip install -r requirements.txt",
+  "postCreateCommand": "pip install -r requirements.txt && pre-commit install",
   "postStartCommand": "mlflow ui --host 0.0.0.0 --port 5000 --allowed-hosts '*' --cors-allowed-origins '*'",
   "forwardPorts": [5000],
   "customizations": {

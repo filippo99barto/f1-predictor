@@ -10,3 +10,4 @@ xgboost
 google-genai
 python-dotenv
 ruff==0.16.2
+pre-commit

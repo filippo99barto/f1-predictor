@@ -95,6 +95,16 @@ pytest tests/features/    # unit tests only (no data/models)
 pytest tests/inference/   # needs local data/ and dev .pkl models
 ```
 
+**Lint & pre-commit:**
+
+```bash
+pip install -r requirements.txt
+pre-commit install        # once per clone — runs ruff on every commit
+pre-commit run --all-files  # lint/format entire repo manually
+```
+
+Config: `pyproject.toml` (`[tool.ruff]`). Hooks: `.pre-commit-config.yaml` (ruff check + format on staged files).
+
 ## Project layout
 
 ```
