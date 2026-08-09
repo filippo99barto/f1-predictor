@@ -31,7 +31,7 @@ FAKE_SCHEDULE = pd.DataFrame(
             "date": "2026-07-27",
         },
         {
-            "season": 2026,
+            "season": 2025,
             "round": 10,
             "raceName": "Belgian Grand Prix",
             "circuitId": "spa",

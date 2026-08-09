@@ -99,11 +99,11 @@ pytest tests/inference/   # needs local data/ and dev .pkl models
 
 ```bash
 pip install -r requirements.txt
-pre-commit install        # once per clone — runs ruff on every commit
-pre-commit run --all-files  # lint/format entire repo manually
+pre-commit install        # once per clone — runs ruff + pytest on every commit
+pre-commit run --all-files  # lint/format/test entire repo manually
 ```
 
-Config: `pyproject.toml` (`[tool.ruff]`). Hooks: `.pre-commit-config.yaml` (ruff check + format on staged files).
+Config: `pyproject.toml` (`[tool.ruff]`). Hooks: `.pre-commit-config.yaml` (ruff check, format, pytest).
 
 ## Project layout
 
