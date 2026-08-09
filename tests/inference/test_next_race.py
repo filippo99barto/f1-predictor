@@ -24,7 +24,7 @@ TARGET_RACE = RaceInfo(
 FAKE_SCHEDULE = pd.DataFrame(
     [
         {
-            "season": 2026,
+            "season": 2025,
             "round": 9,
             "raceName": "Hungarian Grand Prix",
             "circuitId": "hungaroring",
