@@ -5,13 +5,13 @@ import pandas as pd
 import requests
 
 from src.config.constants import (
-    DATA_START_BACKFILL,
-    JOLPI_API_URL,
-    JOLPI_API_LIMIT,
+    BRONZE_CONSTRUCTORS_COLUMNS,
+    BRONZE_QUALIFYING_RESULTS_COLUMNS,
     BRONZE_RACES_COLUMNS,
     BRONZE_RECE_RESULTS_COLUMNS,
-    BRONZE_QUALIFYING_RESULTS_COLUMNS,
-    BRONZE_CONSTRUCTORS_COLUMNS,
+    DATA_START_BACKFILL,
+    JOLPI_API_LIMIT,
+    JOLPI_API_URL,
 )
 from src.storage.storage_backend import StorageBackend
 
@@ -55,7 +55,7 @@ class BronzePipeline:
         start_backfill_year: int | None,
     ) -> list[int]:
         current_year = datetime.datetime.now().year
-        
+
         if backfill:
             start = BronzePipeline._backfill_start_year(start_backfill_year)
             years_to_extract = list(range(start, current_year + 1))

@@ -1,6 +1,8 @@
 import pandas as pd
-from src.storage.storage_backend import StorageBackend
+
 from src.pipelines.silver.schemas import SilverSchemaQualifyingResults
+from src.storage.storage_backend import StorageBackend
+
 
 class SilverPipelineQualifyingResults:
     def __init__(self, storage_backend: StorageBackend):
@@ -12,7 +14,7 @@ class SilverPipelineQualifyingResults:
         """
         df = self._read_bronze_data()
         df = self._transform_bronze_data(df)
-        
+
         self._validate_silver_schema(df)
         self._write_silver_data(df)
 
@@ -50,7 +52,7 @@ class SilverPipelineQualifyingResults:
     def _write_silver_data(self, df: pd.DataFrame) -> None:
         """Write the silver data."""
         self.storage_backend.write("silver/qualifying_results/data", df)
-    
+
     @staticmethod
     def parse_lap_time(t: str) -> float | None:
         """Convert '1:31.471' to 91.471 seconds. Returns None for empty."""

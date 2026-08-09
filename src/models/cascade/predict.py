@@ -5,7 +5,6 @@ from typing import Any, Literal
 import pandas as pd
 
 from src.inference.next_race import (
-    RaceInfo,
     build_inference_frames,
     resolve_target_race,
     target_race_mask,
@@ -15,13 +14,21 @@ from src.models.cascade.load import load_model
 from src.models.qualifying_results.features import build_qualifying_results_features
 from src.models.qualifying_results.train import (
     CONFIG as QUALIFYING_CONFIG,
+)
+from src.models.qualifying_results.train import (
     FEATURE_COLS as QUALIFYING_FEATURE_COLS,
+)
+from src.models.qualifying_results.train import (
     MODEL_NAME as QUALIFYING_MODEL_NAME,
 )
 from src.models.race_results.features import build_race_results_features
 from src.models.race_results.train import (
     CONFIG as RACE_CONFIG,
+)
+from src.models.race_results.train import (
     FEATURE_COLS as RACE_FEATURE_COLS,
+)
+from src.models.race_results.train import (
     MODEL_NAME as RACE_MODEL_NAME,
 )
 

@@ -1,9 +1,10 @@
+from typing import Literal
+
 import joblib
 import mlflow
 import mlflow.sklearn
 import pandas as pd
 from sklearn.pipeline import Pipeline
-from typing import Literal
 from xgboost import XGBRegressor
 
 from src.config.paths import LOCAL_DATA_DIR, LOCAL_MODELS_DIR, MLFLOW_RUNS_DIR

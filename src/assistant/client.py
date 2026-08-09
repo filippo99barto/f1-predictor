@@ -1,6 +1,4 @@
-import json
 import os
-from typing import Any
 
 from google import genai
 from google.genai import types
@@ -33,7 +31,7 @@ def ask(question: str, *, model: str | None = None) -> str:
     """Ask a natural-language question; returns the assistant's final answer."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise EnvironmentError("GEMINI_API_KEY environment variable is not set.")
+        raise OSError("GEMINI_API_KEY environment variable is not set.")
 
     client = genai.Client(api_key=api_key)
     resolved_model = model or DEFAULT_MODEL

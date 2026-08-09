@@ -26,7 +26,7 @@ BRONZE_RECE_RESULTS_COLUMNS = [
 ]
 
 BRONZE_QUALIFYING_RESULTS_COLUMNS = [
-    "season",  
+    "season",
     "round",
     "position",
     "Driver.driverId",

@@ -1,7 +1,9 @@
 import pandas as pd
-from src.storage.storage_backend import StorageBackend
-from src.pipelines.gold.schemas import GoldSchemaRaceResults
+
 from src.models.race_results.features import build_race_results_features
+from src.pipelines.gold.schemas import GoldSchemaRaceResults
+from src.storage.storage_backend import StorageBackend
+
 
 class GoldPipelineRaceResults:
     def __init__(self, storage_backend: StorageBackend):
@@ -15,9 +17,9 @@ class GoldPipelineRaceResults:
         df = self._transform_silver_data(df)
         df = self._validate_gold_schema(df)
         self._write_gold_data(df)
-        
+
         return df
-    
+
     def _read_silver_data(self) -> pd.DataFrame:
         """
         Read the silver data.
@@ -28,7 +30,7 @@ class GoldPipelineRaceResults:
         df = pd.merge(df_race_results, df_qualifying_results, on=["season", "round", "driverId", "constructorId", "circuitId"], how="inner")
 
         return df
-    
+
     def _transform_silver_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Transform the silver data.
@@ -44,7 +46,7 @@ class GoldPipelineRaceResults:
         Write the gold data.
         """
         self.storage_backend.write("gold/race_results/data", df)
-    
+
     def _validate_gold_schema(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Validate the gold schema.

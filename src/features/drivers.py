@@ -23,7 +23,7 @@ def add_driver_median_position_previous_3_races(df: pd.DataFrame) -> pd.DataFram
 
 def add_driver_season_mediam_position(df: pd.DataFrame) -> pd.DataFrame:
     """Add the driver season median position feature."""
-    
+
     df = df.sort_values(["driverId", "season", "round"])
     df["driver_season_median_position"] = (
         df.groupby(["driverId", "season"])["position"]
@@ -82,7 +82,7 @@ def add_driver_circuit_median_career_position(df: pd.DataFrame) -> pd.DataFrame:
 
 def add_driver_previous_qualifying_position(df: pd.DataFrame) -> pd.DataFrame:
     """Add the driver's last qualifying position feature."""
-    
+
     df = df.sort_values(["driverId", "season", "round"])
     df["driver_last_qualifying_position"] = (
         df.groupby("driverId")["qualifying_position"]
@@ -94,7 +94,7 @@ def add_driver_previous_qualifying_position(df: pd.DataFrame) -> pd.DataFrame:
 
 def add_driver_previous_qualifying_gap_to_pole(df: pd.DataFrame) -> pd.DataFrame:
     """Add the driver's last qualifying gap to pole position feature."""
-    
+
     df = df.sort_values(["driverId", "season", "round"])
     df["best_q_seconds"] = df[["q1_seconds", "q2_seconds", "q3_seconds"]].min(axis=1)
 
@@ -116,7 +116,7 @@ def add_driver_previous_qualifying_gap_to_pole(df: pd.DataFrame) -> pd.DataFrame
 
 def add_driver_qualifying_season_median(df: pd.DataFrame) -> pd.DataFrame:
     """Add the driver's qualifying season median feature."""
-    
+
     df = df.sort_values(["driverId", "season", "round"])
     df["driver_qualifying_season_median"] = (
         df.groupby(["driverId", "season"])["qualifying_position"]
@@ -127,7 +127,7 @@ def add_driver_qualifying_season_median(df: pd.DataFrame) -> pd.DataFrame:
 
 def add_driver_qualifying_career_median(df: pd.DataFrame) -> pd.DataFrame:
     """Add the driver's qualifying career median feature."""
-    
+
     df = df.sort_values(["driverId", "season", "round"])
     df["driver_qualifying_career_median"] = (
         df.groupby("driverId")["qualifying_position"]
@@ -137,7 +137,7 @@ def add_driver_qualifying_career_median(df: pd.DataFrame) -> pd.DataFrame:
 
 def add_driver_qualifying_circuit_median(df: pd.DataFrame) -> pd.DataFrame:
     """Add the driver's qualifying circuit median feature."""
-    
+
     df = df.sort_values(["driverId", "circuitId", "season", "round"])
     df["driver_qualifying_circuit_median"] = (
         df.groupby(["driverId", "circuitId"])["qualifying_position"]

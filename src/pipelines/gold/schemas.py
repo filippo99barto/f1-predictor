@@ -1,6 +1,7 @@
 import pandera.pandas as pa
 from pandera.typing import Series
 
+
 class GoldSchemaRaceResults(pa.DataFrameModel):
     #target
     position: Series[int] = pa.Field(ge=1)

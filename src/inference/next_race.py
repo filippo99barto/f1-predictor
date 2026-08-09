@@ -146,9 +146,8 @@ def build_inference_frames(
 
     scaffolds = scaffolds[merged.columns]
     for col in merged.columns:
-        if col in scaffolds.columns and col in merged.dtypes:
-            if merged.dtypes[col] != scaffolds.dtypes[col]:
-                scaffolds[col] = scaffolds[col].astype(merged.dtypes[col], errors="ignore")
+        if col in scaffolds.columns and merged.dtypes[col] != scaffolds.dtypes[col]:
+            scaffolds[col] = scaffolds[col].astype(merged.dtypes[col], errors="ignore")
     return pd.concat([merged, scaffolds], ignore_index=True)
 
 

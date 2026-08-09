@@ -1,5 +1,7 @@
 import pandas as pd
+
 from src.storage.storage_backend import StorageBackend
+
 
 class LocalStorageBackend(StorageBackend):
     def __init__(self, root):
@@ -22,7 +24,7 @@ class LocalStorageBackend(StorageBackend):
             for file in files:
                 df = pd.read_json(file, orient="records")
                 df_final = pd.concat([df_final, df])
-                
+
         return df_final
 
     def write(self, dataset: str, df: pd.DataFrame) -> None:

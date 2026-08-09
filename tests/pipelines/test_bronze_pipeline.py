@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 from src.pipelines.bronze.pipeline import BronzePipeline
 
 

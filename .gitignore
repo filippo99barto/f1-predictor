@@ -10,3 +10,4 @@ old-data/
 data/
 *.pkl
 plans/
+.ruff_cache/

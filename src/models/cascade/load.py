@@ -1,6 +1,7 @@
+from typing import Literal
+
 import joblib
 import mlflow.sklearn
-from typing import Literal
 
 from src.config.paths import LOCAL_MODELS_DIR
 

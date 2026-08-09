@@ -1,6 +1,8 @@
 import pandas as pd
-from src.storage.storage_backend import StorageBackend
+
 from src.pipelines.silver.schemas import SilverSchemaRaceResults
+from src.storage.storage_backend import StorageBackend
+
 
 class SilverPipelineRaceResults:
     def __init__(self, storage_backend: StorageBackend):
@@ -12,7 +14,7 @@ class SilverPipelineRaceResults:
         """
         df = self._read_bronze_data()
         df = self._transform_bronze_data(df)
-        
+
         self._validate_silver_schema(df)
         self._write_silver_data(df)
 
@@ -25,7 +27,7 @@ class SilverPipelineRaceResults:
         df_races = self.storage_backend.read("bronze/races")
         df_results = self.storage_backend.read("bronze/race_results")
         return df_races.merge(df_results, on=["season", "round"], how="inner")
-    
+
     def _transform_bronze_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Transform the bronze data."""
 
@@ -43,7 +45,7 @@ class SilverPipelineRaceResults:
         """Validate the silver schema."""
         validated = SilverSchemaRaceResults.validate(df, lazy=True)
         return validated
-    
+
     def _write_silver_data(self, df: pd.DataFrame) -> None:
         """Write the silver data."""
         self.storage_backend.write("silver/race_results/data", df)
