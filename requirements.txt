@@ -4,6 +4,7 @@ ipykernel
 pandas
 numpy
 pytest
+pytest-cov
 pandera
 mlflow
 xgboost

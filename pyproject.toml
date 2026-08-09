@@ -26,3 +26,16 @@ known-first-party = ["src", "tests"]
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.coverage.run]
+source = ["src"]
+omit = []
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 55
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+]

@@ -11,3 +11,5 @@ data/
 *.pkl
 plans/
 .ruff_cache/
+.coverage
+htmlcov/

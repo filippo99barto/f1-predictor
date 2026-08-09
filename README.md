@@ -91,9 +91,12 @@ See `notebooks/assistant.ipynb` for examples.
 
 ```bash
 pytest                    # full suite
+pytest --cov=src --cov-report=term-missing  # with coverage report
 pytest tests/features/    # unit tests only (no data/models)
 pytest tests/inference/   # needs local data/ and dev .pkl models
 ```
+
+For a local HTML report: `pytest --cov=src --cov-report=html` (output in `htmlcov/`).
 
 **Lint & pre-commit:**
 
@@ -103,7 +106,7 @@ pre-commit install        # once per clone — runs ruff + pytest on every commi
 pre-commit run --all-files  # lint/format/test entire repo manually
 ```
 
-Config: `pyproject.toml` (`[tool.ruff]`). Hooks: `.pre-commit-config.yaml` (ruff check, format, pytest).
+Config: `pyproject.toml` (`[tool.ruff]`, `[tool.coverage.*]`). Hooks: `.pre-commit-config.yaml` (ruff check, format, pytest with coverage). Pre-commit enforces a minimum coverage threshold via `fail_under` in `pyproject.toml`.
 
 ## Project layout
 
