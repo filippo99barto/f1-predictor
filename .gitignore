@@ -4,11 +4,7 @@ __pycache__/
 *.pyc
 .DS_Store
 .env
-mlruns/
-mlflow.db
-old-data/
 datasets/
-data/
 *.pkl
 plans/
 .ruff_cache/
