@@ -1,20 +1,28 @@
 {
   "name": "F1 Predictor",
-  "image": "mcr.microsoft.com/devcontainers/python:1-3.12",
-  "containerEnv": {
-    "MLFLOW_TRACKING_URI": "sqlite:///${containerWorkspaceFolder}/mlflow.db",
-    "MLFLOW_BACKEND_STORE_URI": "sqlite:///${containerWorkspaceFolder}/mlflow.db",
-    "MLFLOW_SERVER_DISABLE_SECURITY_MIDDLEWARE": "true"
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/f1_predictor",
+  "remoteEnv": {
+    "PATH": "${containerEnv:HOME}/.local/bin:${containerEnv:PATH}"
   },
-  "postCreateCommand": "pip install -r requirements.txt && pre-commit install",
-  "postStartCommand": "mlflow ui --host 0.0.0.0 --port 5000 --allowed-hosts '*' --cors-allowed-origins '*'",
-  "forwardPorts": [5000],
+  "containerEnv": {
+    "MLFLOW_TRACKING_URI": "http://mlflow:5000",
+    "MLFLOW_S3_ENDPOINT_URL": "http://minio:9000",
+    "AWS_ACCESS_KEY_ID": "minioadmin",
+    "AWS_SECRET_ACCESS_KEY": "minioadmin",
+    "AWS_DEFAULT_REGION": "us-east-1"
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
         "ms-toolsai.jupyter"
-      ]
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"
+      }
     }
   }
 }

@@ -18,7 +18,7 @@ flowchart TB
     Cascade --> Assistant[Gemini Assistant]
 ```
 
-At inference time grid order is unknown, so the quali model runs first. Its predictions are written into `qualifying_position`, then the race model predicts finishing positions. See `src/models/cascade/predict.py` and `evaluate.py`.
+At inference time grid order is unknown, so the quali model runs first. Its predictions are written into `qualifying_position`, then the race model predicts finishing positions. See `packages/f1_ml/f1_ml/models/cascade/predict.py` and `evaluate.py`.
 
 ## Pipeline & models
 
@@ -31,7 +31,7 @@ At inference time grid order is unknown, so the quali model runs first. Its pred
 | **Race model** | 11 features → `position` (grid input: `qualifying_position` only) |
 | **Cascade** | Quali predictions fed into race model at inference/eval |
 
-Features live in `src/features/` (shared primitives) and `src/models/*/features.py` (model-specific). All use lag/shift to avoid leakage; missing values on first circuit visits fall back to `qualifying_position`.
+Features live in `packages/f1_ml/f1_ml/features/` (shared primitives) and `packages/f1_ml/f1_ml/models/*/features.py` (model-specific). All use lag/shift to avoid leakage; missing values on first circuit visits fall back to `qualifying_position`.
 
 Both models are XGBoost regressors (`reg:absoluteerror`), logged to MLflow with MAE overall and by slice (top 3, top 10, P11+).
 
@@ -42,12 +42,13 @@ Both models are XGBoost regressors (`reg:absoluteerror`), logged to MLflow with 
 
 ## Quick start
 
-**Dev container (recommended)** — opens with dependencies, MLflow UI on port 5000 (`sqlite:///mlflow.db`).
+**Dev container (recommended)** — opens with dependencies via `uv sync`, Postgres + MinIO + MLflow sidecars. MLflow UI: `http://localhost:5001`, MinIO console: `http://localhost:9001` (login `minioadmin` / `minioadmin`).
 
 **Manual setup:**
 
 ```bash
-pip install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync --all-packages
 ```
 
 Optional `.env` for the assistant:
@@ -71,7 +72,7 @@ Uncomment production lines in the notebook to register models.
 **Predict:**
 
 ```python
-from src.models.cascade.predict import predict_next_race
+from f1_ml.models.cascade.predict import predict_next_race
 
 result = predict_next_race(mode="production")
 print(result.winner, result.podium)
@@ -80,7 +81,7 @@ print(result.winner, result.podium)
 **Assistant:**
 
 ```python
-from src.assistant.client import ask
+from f1_agent.client import ask
 
 answer = ask("Who will win the next race?")
 ```
@@ -90,18 +91,18 @@ See `notebooks/assistant.ipynb` for examples.
 **Tests:**
 
 ```bash
-pytest                    # full suite
-pytest --cov=src --cov-report=term-missing  # with coverage report
-pytest tests/features/    # unit tests only (no data/models)
-pytest tests/inference/   # needs local data/ and dev .pkl models
+uv run pytest                    # full suite
+uv run pytest --cov=f1_data --cov=f1_ml --cov=f1_agent --cov-report=term-missing
+uv run pytest packages/f1_ml/tests/features/    # unit tests only (no data/models)
+uv run pytest packages/f1_ml/tests/inference/   # needs local datasets/ and dev .pkl models
 ```
 
-For a local HTML report: `pytest --cov=src --cov-report=html` (output in `htmlcov/`).
+For a local HTML report: `uv run pytest --cov=f1_data --cov=f1_ml --cov=f1_agent --cov-report=html` (output in `htmlcov/`).
 
 **Lint & pre-commit:**
 
 ```bash
-pip install -r requirements.txt
+uv sync --all-packages
 pre-commit install        # once per clone — runs ruff + pytest on every commit
 pre-commit run --all-files  # lint/format/test entire repo manually
 ```
@@ -112,15 +113,16 @@ Config: `pyproject.toml` (`[tool.ruff]`, `[tool.coverage.*]`). Hooks: `.pre-comm
 
 ```
 f1_predictor/
-├── notebooks/          train.ipynb, assistant.ipynb
-├── src/
-│   ├── assistant/      Gemini client + tools
-│   ├── features/       Driver/constructor feature primitives
-│   ├── inference/      Next-race schedule, lineup, scaffolds
-│   ├── models/         Quali/race train configs, cascade predict/eval
-│   └── pipelines/      Bronze, silver, gold
-├── plans/              Design notes and roadmaps
-└── tests/
+├── .devcontainer/          devcontainer.json, docker-compose.yml (app + postgres + minio + mlflow)
+├── packages/
+│   ├── f1_data/            Bronze/silver pipelines, storage, config
+│   ├── f1_ml/              Gold pipelines, features, models, inference
+│   └── f1_agent/           Gemini client + tools
+├── datasets/               Local JSON extracts (gitignored)
+├── notebooks/              train.ipynb, assistant.ipynb
+├── plans/                  Design notes and roadmaps
+├── pyproject.toml          uv workspace root
+└── uv.lock
 ```
 
 ## Configuration
@@ -128,11 +130,14 @@ f1_predictor/
 | Variable | Purpose |
 |----------|---------|
 | `GEMINI_API_KEY` | Required for `ask()` |
-| `MLFLOW_TRACKING_URI` | Default `sqlite:///mlflow.db` in devcontainer |
+| `MLFLOW_TRACKING_URI` | Default `http://mlflow:5000` in devcontainer; `http://localhost:5001` when port-forwarded locally |
+| `MLFLOW_S3_ENDPOINT_URL` | Default `http://minio:9000` in devcontainer (MinIO artifact store) |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | MinIO credentials in devcontainer (`minioadmin` / `minioadmin`) |
+| `F1_REPO_ROOT` | Optional override for repo root detection (used by path config) |
 
-Backfill start year: `src/config/constants.py` (`DATA_START_BACKFILL = 2022`, used when `extract_bronze_data(backfill=True)`).
+Backfill start year: `packages/f1_data/f1_data/config/constants.py` (`DATA_START_BACKFILL = 2022`, used when `extract_bronze_data(backfill=True)`).
 
-**Generated locally (gitignored):** `data/`, `mlruns/`, `mlflow.db`, `src/models/*/*.pkl`, `.env`
+**Generated locally (gitignored):** `datasets/`, `mlruns/`, `mlflow.db`, `packages/f1_ml/f1_ml/models/**/*.pkl`, `.env`
 
 ---
 

@@ -1,10 +1,33 @@
+[project]
+name = "f1-predictor"
+version = "0.0.0"
+requires-python = ">=3.12"
+
+[tool.uv.workspace]
+members = ["packages/f1_data", "packages/f1_ml", "packages/f1_agent"]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff==0.16.2",
+    "pre-commit",
+    "jupyter",
+    "ipykernel",
+]
+
+[tool.uv]
+package = false
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 exclude = [
     "mlruns",
+    "datasets",
     "data",
     "notebooks",
+    ".venv",
 ]
 
 [tool.ruff.lint]
@@ -22,13 +45,13 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["src", "tests"]
+known-first-party = ["f1_data", "f1_ml", "f1_agent"]
 
 [tool.ruff.format]
 quote-style = "double"
 
 [tool.coverage.run]
-source = ["src"]
+source = ["f1_data", "f1_ml", "f1_agent"]
 omit = []
 
 [tool.coverage.report]

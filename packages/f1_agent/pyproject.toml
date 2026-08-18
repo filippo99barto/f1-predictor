@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "f1-agent"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "f1-ml",
+    "google-genai",
+    "python-dotenv",
+]
+
+[tool.uv.sources]
+f1-ml = { workspace = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["f1_agent"]

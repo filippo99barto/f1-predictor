@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "f1-data"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pandera",
+    "requests",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["f1_data"]

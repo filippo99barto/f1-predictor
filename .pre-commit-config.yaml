@@ -10,7 +10,7 @@ repos:
     hooks:
       - id: pytest-cov
         name: pytest
-        entry: pytest -q --cov=src --cov-report=term-missing
+        entry: uv run pytest -q --cov=f1_data --cov=f1_ml --cov=f1_agent --cov-report=term-missing
         language: system
         pass_filenames: false
         always_run: true
