@@ -30,7 +30,7 @@ def _get_holdout_test(
     return test_df
 
 
-def evaluate_cascade(
+def evaluate_quali_race_cascade(
     mode: Literal["dev", "production"] = "dev",
     holdout_fraction: float = 0.5,
 ) -> None:
@@ -83,4 +83,4 @@ def evaluate_cascade(
 
 
 if __name__ == "__main__":
-    evaluate_cascade()
+    evaluate_quali_race_cascade()
