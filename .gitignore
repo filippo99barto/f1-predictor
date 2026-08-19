@@ -12,5 +12,3 @@ plans/
 htmlcov/
 .langgraph_api/
 .pnpm-store/
-
-packages/f1_agent/ui/
