@@ -10,7 +10,6 @@ class ModelTrainConfig:
     model_name: str
     gold_schema: str
     gold_table: str
-    model_subdir: str
     feature_cols: list[str]
     target_col: str
     baseline_col: str

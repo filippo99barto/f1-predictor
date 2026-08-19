@@ -9,7 +9,6 @@ requires-python = ">=3.12"
 dependencies = [
     "f1-data",
     "boto3",
-    "joblib",
     "mlflow",
     "numpy",
     "pandas",

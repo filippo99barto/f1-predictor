@@ -1020,7 +1020,6 @@ source = { editable = "packages/f1_ml" }
 dependencies = [
     { name = "boto3" },
     { name = "f1-data" },
-    { name = "joblib" },
     { name = "mlflow" },
     { name = "numpy" },
     { name = "pandas" },
@@ -1032,7 +1031,6 @@ dependencies = [
 requires-dist = [
     { name = "boto3" },
     { name = "f1-data", editable = "packages/f1_data" },
-    { name = "joblib" },
     { name = "mlflow" },
     { name = "numpy" },
     { name = "pandas" },

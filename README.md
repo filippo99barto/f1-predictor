@@ -21,7 +21,7 @@ flowchart TB
     Server --> UI[Chat UI]
 ```
 
-At inference time grid order is unknown, so the quali model runs first. Its predictions are written into `qualifying_position`, then the race model predicts finishing positions. See `packages/f1_ml/f1_ml/models/cascade/predict.py` and `evaluate.py`.
+At inference time grid order is unknown, so the quali model runs first. Its predictions are written into `qualifying_position`, then the race model predicts finishing positions. See `packages/f1_ml/f1_ml/models/qualifying/predict.py`, `packages/f1_ml/f1_ml/models/race/predict.py`, and `packages/f1_ml/f1_ml/models/evaluate.py`.
 
 ## Pipeline & models
 
@@ -34,13 +34,13 @@ At inference time grid order is unknown, so the quali model runs first. Its pred
 | **Race model** | 11 features → `position` (grid input: `qualifying_position` only) |
 | **Cascade** | Quali predictions fed into race model at inference/eval |
 
-Features live in `packages/f1_ml/f1_ml/features/` (shared primitives) and `packages/f1_ml/f1_ml/models/*/features.py` (model-specific). All use lag/shift to avoid leakage; missing values on first circuit visits fall back to `qualifying_position`.
+Features live in `packages/f1_ml/f1_ml/models/common/features/` (shared primitives) and `packages/f1_ml/f1_ml/models/{qualifying,race}/features.py` (model recipes). All use lag/shift to avoid leakage; missing values on first circuit visits fall back to `qualifying_position`.
 
 Both models are XGBoost regressors (`reg:absoluteerror`), logged to MLflow with MAE overall and by slice (top 3, top 10, P11+).
 
 | Mode | Split | Output |
 |------|-------|--------|
-| `dev` | Last 50% of rounds in latest season | Local `-dev.pkl` artifacts |
+| `dev` | Last 50% of rounds in latest season | Metrics logged to MLflow (not registered) |
 | `production` | Hold out most recent completed race | Retrain on all data, register in MLflow |
 
 ## Quick start
@@ -77,9 +77,9 @@ Uncomment production lines in the notebook to register models.
 **Predict:**
 
 ```python
-from f1_ml.models.cascade.predict import predict_next_race
+from f1_ml.models.race.predict import predict_next_race
 
-result = predict_next_race(mode="production")
+result = predict_next_race()
 print(result.winner, result.podium)
 ```
 
@@ -109,8 +109,8 @@ Open `http://localhost:3000`. The UI talks to the server at `http://localhost:20
 ```bash
 uv run pytest                    # full suite
 uv run pytest --cov=f1_data --cov=f1_ml --cov=f1_agent --cov-report=term-missing
-uv run pytest packages/f1_ml/tests/features/    # unit tests only (no data/models)
-uv run pytest packages/f1_ml/tests/inference/   # needs local datasets/ and dev .pkl models
+uv run pytest packages/f1_ml/tests/features/     # unit tests only (no data/models)
+uv run pytest packages/f1_ml/tests/inference/    # schedule/lineup + mocked predict smoke tests
 ```
 
 For a local HTML report: `uv run pytest --cov=f1_data --cov=f1_ml --cov=f1_agent --cov-report=html` (output in `htmlcov/`).
@@ -132,7 +132,7 @@ f1_predictor/
 ├── .devcontainer/          devcontainer.json, docker-compose.yml (app + postgres + minio + mlflow)
 ├── packages/
 │   ├── f1_data/            Bronze/silver pipelines, storage, config
-│   ├── f1_ml/              Gold pipelines, features, models, inference
+│   ├── f1_ml/              Gold pipelines, qualifying/race models, inference
 │   └── f1_agent/           LangChain agent, tools, chat UI (`ui/`)
 ├── langgraph.json          LangGraph server entry (`f1_agent.agent:agent`)
 ├── datasets/               Local JSON extracts (gitignored)
@@ -155,7 +155,7 @@ f1_predictor/
 
 Backfill start year: `packages/f1_data/f1_data/config/constants.py` (`DATA_START_BACKFILL = 2022`, used when `extract_bronze_data(backfill=True)`).
 
-**Generated locally (gitignored):** `datasets/`, `mlruns/`, `mlflow.db`, `packages/f1_ml/f1_ml/models/**/*.pkl`, `.env`
+**Generated locally (gitignored):** `datasets/`, `mlruns/`, `mlflow.db`, `.env`
 
 ---
 

@@ -1,6 +1,5 @@
 from typing import Literal
 
-import joblib
 import mlflow
 import mlflow.sklearn
 import pandas as pd
@@ -8,10 +7,9 @@ from sklearn.pipeline import Pipeline
 from xgboost import XGBRegressor
 
 from f1_data.storage.postgres_storage_backend import get_storage_backend
-from f1_ml.config.paths import LOCAL_MODELS_DIR
-from f1_ml.models.training.config import ModelTrainConfig
-from f1_ml.models.training.metrics import baseline_mae, mae_slices
-from f1_ml.models.training.splits import (
+from f1_ml.models.common.config import ModelTrainConfig
+from f1_ml.models.common.metrics import baseline_mae, mae_slices
+from f1_ml.models.common.splits import (
     SplitInfo,
     get_early_stopping_val_set,
     split_last_race_holdout,
@@ -116,16 +114,10 @@ def train_model(
             _fit_model(model, full_train_df, config)
             mlflow.log_param("full_train_rows", len(full_train_df))
 
-        model_dir = LOCAL_MODELS_DIR / config.model_subdir
-        model_dir.mkdir(parents=True, exist_ok=True)
-
+        log_kwargs: dict = {
+            "skops_trusted_types": SKOPS_TRUSTED_TYPES,
+        }
         if register_model:
-            mlflow.sklearn.log_model(
-                model,
-                name=config.model_name,
-                registered_model_name=config.model_name,
-                skops_trusted_types=SKOPS_TRUSTED_TYPES,
-            )
-            joblib.dump(model, model_dir / f"{config.model_name}.pkl")
-        elif mode == "dev":
-            joblib.dump(model, model_dir / f"{config.model_name}-dev.pkl")
+            log_kwargs["registered_model_name"] = config.model_name
+
+        mlflow.sklearn.log_model(model, name=config.model_name, **log_kwargs)

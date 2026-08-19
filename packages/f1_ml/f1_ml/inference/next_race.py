@@ -4,8 +4,8 @@ import pandas as pd
 
 from f1_data.storage.postgres_storage_backend import get_storage_backend
 from f1_data.storage.storage_backend import StorageBackend
-from f1_ml.models.race_results.train import load_training_data as load_race_gold
-from f1_ml.models.training.splits import get_last_completed_race
+from f1_ml.models.common.splits import get_last_completed_race
+from f1_ml.models.race.train import load_training_data as load_race_gold
 
 MERGE_KEYS = ["season", "round", "driver_id", "constructor_id", "circuit_id"]
 

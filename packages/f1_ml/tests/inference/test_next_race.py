@@ -1,17 +1,14 @@
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
-import pytest
 
-from f1_ml.config.paths import LOCAL_MODELS_DIR
 from f1_ml.inference.next_race import (
     RaceInfo,
     get_driver_lineup,
     load_race_schedule,
     resolve_target_race,
 )
-from f1_ml.models.qualifying_results.train import MODEL_NAME as QUALIFYING_MODEL_NAME
-from f1_ml.models.race_results.train import MODEL_NAME as RACE_MODEL_NAME
 
 TARGET_RACE = RaceInfo(
     season=2026,
@@ -152,21 +149,22 @@ def test_load_race_schedule_filters_season(mock_storage):
     assert schedule["round"].max() == 11
 
 
-def _dev_models_available() -> bool:
-    quali = LOCAL_MODELS_DIR / "qualifying_results" / f"{QUALIFYING_MODEL_NAME}-dev.pkl"
-    race = LOCAL_MODELS_DIR / "race_results" / f"{RACE_MODEL_NAME}-dev.pkl"
-    return quali.exists() and race.exists()
+class _FakeModel:
+    def predict(self, X):
+        return np.arange(1, len(X) + 1, dtype=float)
 
 
-@pytest.mark.skipif(not _dev_models_available(), reason="Dev model artifacts not present")
-@patch("f1_ml.models.cascade.predict.build_inference_frames")
-@patch("f1_ml.models.cascade.predict.resolve_target_race")
-def test_predict_next_race_smoke(mock_resolve, mock_frames):
-    from f1_ml.models.cascade.predict import predict_next_race
+@patch("f1_ml.models.race.predict.load_model", return_value=_FakeModel())
+@patch("f1_ml.models.qualifying.predict.load_model", return_value=_FakeModel())
+@patch("f1_ml.models.race.predict.build_inference_frames")
+@patch("f1_ml.models.race.predict.resolve_target_race")
+def test_predict_next_race_smoke(mock_resolve, mock_frames, _mock_qualy_load, _mock_race_load):
+    from f1_ml.models.race.predict import predict_next_race
 
     mock_resolve.return_value = TARGET_RACE
     mock_frames.side_effect = _fake_inference_frames
-    result = predict_next_race(mode="dev")
+    result = predict_next_race()
+    payload = result.to_dict(top_n=3)
 
     assert result.season == 2026
     assert result.round == 10
@@ -175,3 +173,26 @@ def test_predict_next_race_smoke(mock_resolve, mock_frames):
     assert len(result.predictions) >= 20
     assert result.winner in result.predictions["driver_id"].values
     assert len(result.podium) == 3
+    assert payload["winner"]["driver_id"] == result.winner
+    assert len(payload["predictions"]) == 3
+
+
+@patch("f1_ml.models.qualifying.predict.load_model", return_value=_FakeModel())
+@patch("f1_ml.models.qualifying.predict.build_inference_frames")
+@patch("f1_ml.models.qualifying.predict.resolve_target_race")
+def test_predict_next_qualifying_smoke(mock_resolve, mock_frames, _mock_load):
+    from f1_ml.models.qualifying.predict import predict_next_qualifying
+
+    mock_resolve.return_value = TARGET_RACE
+    mock_frames.side_effect = _fake_inference_frames
+    result = predict_next_qualifying()
+    payload = result.to_dict(top_n=3)
+
+    assert result.season == 2026
+    assert result.round == 10
+    assert result.pole in result.predictions["driver_id"].values
+    assert "predicted_qualifying_position" in result.predictions.columns
+    assert "predicted_race_position" not in result.predictions.columns
+    assert "constructor_id" in result.predictions.columns
+    assert payload["pole"]["driver_id"] == result.pole
+    assert len(payload["predictions"]) == 3

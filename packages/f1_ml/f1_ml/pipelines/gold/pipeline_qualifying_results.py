@@ -1,7 +1,7 @@
 import pandas as pd
 
 from f1_data.storage.storage_backend import StorageBackend
-from f1_ml.models.qualifying_results.features import build_qualifying_results_features
+from f1_ml.models.qualifying.features import build_qualifying_results_features
 from f1_ml.pipelines.gold.schemas import GoldSchemaQualifyingResults
 
 

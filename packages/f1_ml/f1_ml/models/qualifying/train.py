@@ -2,9 +2,9 @@ from typing import Literal
 
 import pandas as pd
 
-from f1_ml.models.training.config import ModelTrainConfig
-from f1_ml.models.training.trainer import load_training_data as _load_training_data
-from f1_ml.models.training.trainer import train_model as _train_model
+from f1_ml.models.common.config import ModelTrainConfig
+from f1_ml.models.common.trainer import load_training_data as _load_training_data
+from f1_ml.models.common.trainer import train_model as _train_model
 
 EXPERIMENT_NAME = "f1-qualifying-results-predictor"
 MODEL_NAME = "f1_qualifying_predictor"
@@ -40,7 +40,6 @@ CONFIG = ModelTrainConfig(
     model_name=MODEL_NAME,
     gold_schema="gold",
     gold_table="qualifying_results",
-    model_subdir="qualifying_results",
     feature_cols=FEATURE_COLS,
     target_col="qualifying_position",
     baseline_col="driver_last_qualifying_position",

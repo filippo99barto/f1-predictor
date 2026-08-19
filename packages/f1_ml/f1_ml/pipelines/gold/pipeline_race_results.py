@@ -1,7 +1,7 @@
 import pandas as pd
 
 from f1_data.storage.storage_backend import StorageBackend
-from f1_ml.models.race_results.features import build_race_results_features
+from f1_ml.models.race.features import build_race_results_features
 from f1_ml.pipelines.gold.schemas import GoldSchemaRaceResults
 
 

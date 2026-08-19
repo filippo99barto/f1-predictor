@@ -1,1 +1,1 @@
-"""F1 ML features, models, training, and inference."""
+"""F1 ML gold tables, models, and inference."""

@@ -1,10 +1,10 @@
 import pandas as pd
 
-from f1_ml.features.constructors import (
+from f1_ml.models.common.features.constructors import (
     add_constructor_median_position_previous_3_races,
     add_constructor_median_season_position,
 )
-from f1_ml.features.drivers import (
+from f1_ml.models.common.features.drivers import (
     add_driver_circuit_median_career_position,
     add_driver_circuit_median_position_previous_3_races,
     add_driver_median_position_previous_3_races,

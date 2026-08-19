@@ -3,12 +3,12 @@ import math
 import pandas as pd
 import pytest
 
-from f1_ml.features.constructors import (
+from f1_ml.models.common.features.constructors import (
     add_constructor_median_position_previous_3_races,
     add_constructor_median_season_position,
     add_constructor_qualifying_season_median,
 )
-from f1_ml.features.drivers import add_driver_qualifying_career_median
+from f1_ml.models.common.features.drivers import add_driver_qualifying_career_median
 
 
 def team_value(df: pd.DataFrame, constructor_id: str, round_num: int, column: str):

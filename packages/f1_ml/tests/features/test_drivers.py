@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from tests.conftest import row_value
 
-from f1_ml.features.drivers import (
+from f1_ml.models.common.features.drivers import (
     add_driver_circuit_median_career_position,
     add_driver_circuit_median_position_previous_3_races,
     add_driver_median_position_previous_3_races,

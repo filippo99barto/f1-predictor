@@ -1,46 +1,18 @@
-import logging
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Any
 
 import pandas as pd
 
-from f1_ml.inference.next_race import (
-    build_inference_frames,
-    resolve_target_race,
-    target_race_mask,
-)
-from f1_ml.models.cascade.evaluate import MERGE_KEYS
-from f1_ml.models.cascade.load import load_model
-from f1_ml.models.qualifying_results.features import build_qualifying_results_features
-from f1_ml.models.qualifying_results.train import (
-    CONFIG as QUALIFYING_CONFIG,
-)
-from f1_ml.models.qualifying_results.train import (
-    FEATURE_COLS as QUALIFYING_FEATURE_COLS,
-)
-from f1_ml.models.qualifying_results.train import (
-    MODEL_NAME as QUALIFYING_MODEL_NAME,
-)
-from f1_ml.models.race_results.features import build_race_results_features
-from f1_ml.models.race_results.train import (
-    CONFIG as RACE_CONFIG,
-)
-from f1_ml.models.race_results.train import (
-    FEATURE_COLS as RACE_FEATURE_COLS,
-)
-from f1_ml.models.race_results.train import (
-    MODEL_NAME as RACE_MODEL_NAME,
-)
-
-logger = logging.getLogger(__name__)
-
-
-def format_driver_id(driver_id: str) -> str:
-    return driver_id.replace("_", " ").title()
+from f1_ml.inference.next_race import build_inference_frames, resolve_target_race, target_race_mask
+from f1_ml.models.common.load import load_model
+from f1_ml.models.common.predict import drop_incomplete_feature_rows, format_driver_id
+from f1_ml.models.qualifying.predict import predict_qualifying_frame
+from f1_ml.models.race.features import build_race_results_features
+from f1_ml.models.race.train import FEATURE_COLS, MODEL_NAME
 
 
 @dataclass
-class PredictionResult:
+class RacePredictionResult:
     season: int
     round: int
     race_name: str
@@ -80,38 +52,12 @@ class PredictionResult:
         }
 
 
-def _predictable_rows(
-    df: pd.DataFrame,
-    feature_cols: list[str],
-    *,
-    stage: str,
-) -> pd.DataFrame:
-    missing = df[feature_cols].isna()
-    incomplete = missing.any(axis=1)
-    dropped_df = df.loc[incomplete]
-
-    if not dropped_df.empty:
-        for _, row in dropped_df.iterrows():
-            null_cols = missing.loc[row.name]
-            null_features = null_cols[null_cols].index.tolist()
-            logger.warning(
-                "Dropped driver %s (%s) at %s stage: missing %s",
-                row["driver_id"],
-                row.get("constructor_id", "unknown"),
-                stage,
-                null_features,
-            )
-
-    return df.loc[~incomplete]
-
-
 def predict_next_race(
     *,
     season: int | None = None,
     round_num: int | None = None,
-    mode: Literal["dev", "production"] = "production",
-) -> PredictionResult:
-    """Predict qualifying and race finishing positions for the next (or specified) race."""
+) -> RacePredictionResult:
+    """Predict race finishing positions. Runs qualifying internally to fill grid features."""
     race_info = resolve_target_race(season=season, round_num=round_num)
     merged = build_inference_frames(
         race_info.season,
@@ -119,22 +65,8 @@ def predict_next_race(
         race_info.circuit_id,
     )
 
-    qualy_model = load_model(QUALIFYING_MODEL_NAME, QUALIFYING_CONFIG.model_subdir, mode)
-    race_model = load_model(RACE_MODEL_NAME, RACE_CONFIG.model_subdir, mode)
-
-    qualy_features = build_qualifying_results_features(merged, for_inference=True)
-    target_qualy = qualy_features[
-        target_race_mask(qualy_features, race_info.season, race_info.round)
-    ]
-    target_qualy = _predictable_rows(target_qualy, QUALIFYING_FEATURE_COLS, stage="qualifying")
-
-    if target_qualy.empty:
-        raise ValueError("No drivers with complete qualifying features for target race.")
-
-    qualy_pred = qualy_model.predict(target_qualy[QUALIFYING_FEATURE_COLS])
-    qualy_predictions = target_qualy[MERGE_KEYS].assign(
-        predicted_qualifying_position=qualy_pred,
-    )
+    race_model = load_model(MODEL_NAME)
+    qualy_predictions = predict_qualifying_frame(race_info, merged)
 
     merged_for_race = merged.copy()
     target_mask = target_race_mask(merged_for_race, race_info.season, race_info.round)
@@ -145,13 +77,13 @@ def predict_next_race(
 
     race_features = build_race_results_features(merged_for_race, for_inference=True)
     target_race = race_features[target_race_mask(race_features, race_info.season, race_info.round)]
-    target_race = _predictable_rows(target_race, RACE_FEATURE_COLS, stage="race")
+    target_race = drop_incomplete_feature_rows(target_race, FEATURE_COLS, stage="race")
 
     if target_race.empty:
         raise ValueError("No drivers with complete race features for target race.")
 
-    race_x = target_race[RACE_FEATURE_COLS].copy()
-    for col in RACE_FEATURE_COLS:
+    race_x = target_race[FEATURE_COLS].copy()
+    for col in FEATURE_COLS:
         race_x[col] = pd.to_numeric(race_x[col], errors="coerce")
     race_pred = race_model.predict(race_x)
 
@@ -167,7 +99,7 @@ def predict_next_race(
     winner = predictions.iloc[0]["driver_id"]
     podium = predictions.head(3)["driver_id"].tolist()
 
-    return PredictionResult(
+    return RacePredictionResult(
         season=race_info.season,
         round=race_info.round,
         race_name=race_info.race_name,
