@@ -28,6 +28,8 @@ exclude = [
     "data",
     "notebooks",
     ".venv",
+    "packages/f1_agent/ui",
+    ".langgraph_api",
 ]
 
 [tool.ruff.lint]

@@ -1,1 +1,1 @@
-"""F1 Gemini assistant."""
+"""F1 race prediction assistant (LangChain + Gemini tools)."""

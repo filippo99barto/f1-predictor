@@ -15,7 +15,10 @@ flowchart TB
     Gold --> RaceModel[Race XGBoost]
     QualiModel --> Cascade[Cascade Inference]
     RaceModel --> Cascade
-    Cascade --> Assistant[Gemini Assistant]
+    Cascade --> Agent[LangChain Agent]
+    Agent --> Ask["ask()"]
+    Agent --> Server[LangGraph server]
+    Server --> UI[Chat UI]
 ```
 
 At inference time grid order is unknown, so the quali model runs first. Its predictions are written into `qualifying_position`, then the race model predicts finishing positions. See `packages/f1_ml/f1_ml/models/cascade/predict.py` and `evaluate.py`.
@@ -88,7 +91,18 @@ from f1_agent.client import ask
 answer = ask("Who will win the next race?")
 ```
 
-See `notebooks/assistant.ipynb` for examples.
+`ask()` reuses a process-wide LangChain + Gemini agent (`get_agent()`). See `notebooks/assistant.ipynb`.
+
+**Chat UI** — run the LangGraph server, then the Next.js app in `packages/f1_agent/ui`:
+
+```bash
+uv run langgraph dev
+# other terminal
+cd packages/f1_agent/ui && pnpm install && pnpm dev
+```
+
+Open `http://localhost:3000`. The UI talks to the server at `http://localhost:2024` (graph id `agent`), so chat threads persist. Needs `GEMINI_API_KEY`.
+
 
 **Tests:**
 
@@ -119,7 +133,8 @@ f1_predictor/
 ├── packages/
 │   ├── f1_data/            Bronze/silver pipelines, storage, config
 │   ├── f1_ml/              Gold pipelines, features, models, inference
-│   └── f1_agent/           Gemini client + tools
+│   └── f1_agent/           LangChain agent, tools, chat UI (`ui/`)
+├── langgraph.json          LangGraph server entry (`f1_agent.agent:agent`)
 ├── datasets/               Local JSON extracts (gitignored)
 ├── notebooks/              train.ipynb, assistant.ipynb
 ├── plans/                  Design notes and roadmaps
@@ -131,7 +146,7 @@ f1_predictor/
 
 | Variable | Purpose |
 |----------|---------|
-| `GEMINI_API_KEY` | Required for `ask()` |
+| `GEMINI_API_KEY` | Required for `ask()` and the LangGraph server |
 | `MLFLOW_TRACKING_URI` | Default `http://mlflow:5000` in devcontainer; `http://localhost:5001` when port-forwarded locally |
 | `MLFLOW_S3_ENDPOINT_URL` | Default `http://minio:9000` in devcontainer (MinIO artifact store) |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | MinIO credentials in devcontainer (`minioadmin` / `minioadmin`) |

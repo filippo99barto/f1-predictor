@@ -1,80 +1,40 @@
-import os
+from typing import Any
 
-from google import genai
-from google.genai import types
+from f1_agent.agent import DEFAULT_MODEL, SYSTEM_PROMPT, build_agent
 
-from f1_agent.tools import FUNCTION_DECLARATIONS, handle_tool_call
+_agent = None
+_agent_model: str | None = None
 
-try:
-    from dotenv import load_dotenv
+__all__ = ["DEFAULT_MODEL", "SYSTEM_PROMPT", "ask", "get_agent"]
 
-    load_dotenv()
-except ImportError:
-    pass
 
-DEFAULT_MODEL = "gemini-3.1-flash-lite"
+def get_agent(*, model: str | None = None):
+    """Return a process-wide compiled agent, rebuilding only if the model changes."""
+    global _agent, _agent_model
+    resolved = model or DEFAULT_MODEL
+    if _agent is None or _agent_model != resolved:
+        _agent = build_agent(model=resolved)
+        _agent_model = resolved
+    return _agent
 
-SYSTEM_PROMPT = """
-You are an F1 race prediction assistant backed by trained machine learning models.
 
-Rules:
-- Always use the provided tools for predictions or schedule questions. Never invent race results.
-- When asked who will win or about the podium, call predict_next_race.
-- When asked when or where the next race is, call get_next_race_info.
-- Present predictions clearly with driver names, predicted finishing positions, and race context.
-- Mention that predictions are model estimates, not certainties.
-- If a tool returns an error, explain it plainly to the user.
-"""
+def _last_ai_text(result: dict[str, Any]) -> str:
+    message = result["messages"][-1]
+    content = getattr(message, "content", "")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict):
+                parts.append(str(block.get("text", "")))
+        return "".join(parts)
+    return str(content or "")
 
 
 def ask(question: str, *, model: str | None = None) -> str:
     """Ask a natural-language question; returns the assistant's final answer."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise OSError("GEMINI_API_KEY environment variable is not set.")
-
-    client = genai.Client(api_key=api_key)
-    resolved_model = model or DEFAULT_MODEL
-
-    declarations = [
-        types.FunctionDeclaration(**declaration) for declaration in FUNCTION_DECLARATIONS
-    ]
-    config = types.GenerateContentConfig(
-        system_instruction=SYSTEM_PROMPT,
-        tools=[types.Tool(function_declarations=declarations)],
-        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-    )
-
-    contents: list[types.Content] = [
-        types.Content(role="user", parts=[types.Part(text=question)]),
-    ]
-
-    while True:
-        response = client.models.generate_content(
-            model=resolved_model,
-            contents=contents,
-            config=config,
-        )
-        candidate = response.candidates[0].content
-        function_calls = [
-            part.function_call for part in candidate.parts if part.function_call is not None
-        ]
-
-        if not function_calls:
-            return response.text or ""
-
-        contents.append(candidate)
-        for function_call in function_calls:
-            args = dict(function_call.args) if function_call.args else {}
-            result = handle_tool_call(function_call.name, args)
-            contents.append(
-                types.Content(
-                    role="user",
-                    parts=[
-                        types.Part.from_function_response(
-                            name=function_call.name,
-                            response=result,
-                        )
-                    ],
-                )
-            )
+    result = get_agent(model=model).invoke({"messages": [{"role": "user", "content": question}]})
+    return _last_ai_text(result)

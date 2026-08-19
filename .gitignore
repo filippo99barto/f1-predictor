@@ -5,9 +5,12 @@ __pycache__/
 .DS_Store
 .env
 datasets/
-import_json_to_postgres.py
 *.pkl
 plans/
 .ruff_cache/
 .coverage
 htmlcov/
+.langgraph_api/
+.pnpm-store/
+
+packages/f1_agent/ui/

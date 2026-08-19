@@ -7,6 +7,12 @@
     "PATH": "${containerEnv:HOME}/.local/bin:${containerEnv:PATH}"
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22",
+      "pnpmVersion": "10.5.1"
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": [

@@ -1,0 +1,12 @@
+{
+  "python_version": "3.12",
+  "source": {
+    "kind": "uv",
+    "root": ".",
+    "package": "f1-agent"
+  },
+  "graphs": {
+    "agent": "f1_agent.agent:agent"
+  },
+  "env": ".env"
+}
