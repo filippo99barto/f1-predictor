@@ -31,7 +31,12 @@ Rules:
 """
 
 
-def build_agent(*, model: str | None = None, api_key: str | None = None):
+def build_agent(
+    *,
+    model: str | None = None,
+    api_key: str | None = None,
+    checkpointer=None,
+):
     """Compile the F1 agent. Used by LangGraph server and by get_agent()."""
     key = api_key or os.environ.get("GEMINI_API_KEY")
     if not key:
@@ -45,6 +50,7 @@ def build_agent(*, model: str | None = None, api_key: str | None = None):
         model=llm,
         tools=[predict_next_race, predict_next_qualifying, get_next_race_info],
         system_prompt=SYSTEM_PROMPT,
+        checkpointer=checkpointer,
     )
 
 

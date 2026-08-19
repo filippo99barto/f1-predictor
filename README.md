@@ -91,7 +91,7 @@ from f1_agent.client import ask
 answer = ask("Who will win the next race?")
 ```
 
-`ask()` reuses a process-wide LangChain + Gemini agent (`get_agent()`). See `notebooks/assistant.ipynb`.
+`ask()` reuses a process-wide LangChain + Gemini agent (`get_agent()`) with in-memory short-term memory. Follow-up questions in the same process keep prior messages; pass `thread_id` to isolate conversations. See `notebooks/assistant.ipynb`.
 
 **Chat UI** — run the LangGraph server, then the Next.js app in `packages/f1_agent/ui`:
 

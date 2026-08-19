@@ -8,7 +8,10 @@ LangChain + Gemini assistant that calls the F1 ML tools. The compiled graph is b
 from f1_agent.client import ask
 
 answer = ask("Who will win the next race?")
+why = ask("Why that driver?")  # same conversation; sees prior tool results
 ```
+
+Follow-ups reuse an in-memory thread (`thread_id="default"`). Pass a new `thread_id` to start a fresh conversation.
 
 Requires `GEMINI_API_KEY` in the environment or repo-root `.env`.
 
