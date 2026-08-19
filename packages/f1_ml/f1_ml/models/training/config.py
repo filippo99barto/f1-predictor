@@ -8,7 +8,8 @@ import pandas as pd
 class ModelTrainConfig:
     experiment_name: str
     model_name: str
-    gold_path: str
+    gold_schema: str
+    gold_table: str
     model_subdir: str
     feature_cols: list[str]
     target_col: str

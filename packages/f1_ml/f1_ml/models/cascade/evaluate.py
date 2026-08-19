@@ -33,7 +33,7 @@ from f1_ml.models.training.splits import split_last_race_holdout, split_latest_s
 
 EXPERIMENT_NAME = "f1-cascade-predictor"
 
-MERGE_KEYS = ["season", "round", "driverId"]
+MERGE_KEYS = ["season", "round", "driver_id"]
 
 
 def _get_holdout_test(

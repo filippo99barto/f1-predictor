@@ -6,13 +6,6 @@
   "remoteEnv": {
     "PATH": "${containerEnv:HOME}/.local/bin:${containerEnv:PATH}"
   },
-  "containerEnv": {
-    "MLFLOW_TRACKING_URI": "http://mlflow:5000",
-    "MLFLOW_S3_ENDPOINT_URL": "http://minio:9000",
-    "AWS_ACCESS_KEY_ID": "minioadmin",
-    "AWS_SECRET_ACCESS_KEY": "minioadmin",
-    "AWS_DEFAULT_REGION": "us-east-1"
-  },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {

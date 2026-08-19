@@ -31,8 +31,8 @@ class BronzePipeline:
 
         By default only the current season is fetched. Set ``backfill=True`` to
         refresh historical seasons from ``start_backfill_year`` through the
-        current year (inclusive). Existing bronze files for other years are left
-        on disk and are still picked up when silver is rebuilt.
+        current year (inclusive). Other seasons already in bronze tables are left
+        unchanged and are still picked up when silver is rebuilt.
         """
         self._extract_years = self._resolve_years(backfill, start_backfill_year)
 
@@ -61,8 +61,16 @@ class BronzePipeline:
         logging.info("Extract for season %s", current_year)
         return [current_year]
 
-    def _write_bronze_data(self, path: str, filename: str, df: pd.DataFrame) -> None:
-        self.storage_backend.write(f"bronze/{path}/{filename}", df)
+    def _write_bronze_data(self, table: str, df: pd.DataFrame) -> None:
+        self.storage_backend.write("bronze", table, df)
+
+    @staticmethod
+    def _select_bronze_columns(df: pd.DataFrame, columns: dict[str, str]) -> pd.DataFrame:
+        selected = df[list(columns)].rename(columns=columns)
+        for col in ("season", "round"):
+            if col in selected.columns:
+                selected[col] = pd.to_numeric(selected[col], errors="raise").astype(int)
+        return selected
 
     def _extract_races_data(self) -> None:
         for year in self._extract_years:
@@ -77,9 +85,8 @@ class BronzePipeline:
                 races = data["MRData"]["RaceTable"]["Races"]
                 df = pd.json_normalize(races)
 
-                reduced_df = df[BRONZE_RACES_COLUMNS]
-
-                self._write_bronze_data("races", f"{year}", reduced_df)
+                reduced_df = self._select_bronze_columns(df, BRONZE_RACES_COLUMNS)
+                self._write_bronze_data("races", reduced_df)
             except requests.exceptions.HTTPError as e:
                 logging.error(f"HTTP Error extracting races data for {year}: {e}")
                 raise e
@@ -119,8 +126,8 @@ class BronzePipeline:
                     meta=["season", "round"],
                 )
 
-                reduced_df = df[BRONZE_RECE_RESULTS_COLUMNS]
-                self._write_bronze_data("race_results", f"{year}", reduced_df)
+                reduced_df = self._select_bronze_columns(df, BRONZE_RECE_RESULTS_COLUMNS)
+                self._write_bronze_data("race_results", reduced_df)
 
             except requests.exceptions.HTTPError as e:
                 logging.error(f"HTTP Error extracting results data for {year}: {e}")
@@ -160,8 +167,8 @@ class BronzePipeline:
                     record_path="QualifyingResults",
                     meta=["season", "round"],
                 )
-                reduced_df = df[BRONZE_QUALIFYING_RESULTS_COLUMNS]
-                self._write_bronze_data("qualifying_results", f"{year}", reduced_df)
+                reduced_df = self._select_bronze_columns(df, BRONZE_QUALIFYING_RESULTS_COLUMNS)
+                self._write_bronze_data("qualifying_results", reduced_df)
 
             except requests.exceptions.HTTPError as e:
                 logging.error(f"HTTP Error extracting qualifying results data for {year}: {e}")
@@ -187,8 +194,8 @@ class BronzePipeline:
                     meta=["season"],
                 )
 
-                reduced_df = df[BRONZE_CONSTRUCTORS_COLUMNS]
-                self._write_bronze_data("constructors", f"{year}", reduced_df)
+                reduced_df = self._select_bronze_columns(df, BRONZE_CONSTRUCTORS_COLUMNS)
+                self._write_bronze_data("constructors", reduced_df)
 
             except requests.exceptions.HTTPError as e:
                 logging.error(f"HTTP Error extracting constructors data for {year}: {e}")

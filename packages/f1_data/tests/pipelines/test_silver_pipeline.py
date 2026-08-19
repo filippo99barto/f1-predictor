@@ -17,13 +17,13 @@ def _race_row(
     return {
         "season": season,
         "round": round_num,
-        "circuitId": "test_circuit",
+        "circuit_id": "test_circuit",
         "position": position,
         "points": 0.0,
         "starting_position": starting_position,
         "status": "Finished",
-        "driverId": driver_id,
-        "constructorId": "test_team",
+        "driver_id": driver_id,
+        "constructor_id": "test_team",
     }
 
 
@@ -39,7 +39,7 @@ def test_pit_lane_start_maps_to_field_size():
 
     result = SilverPipelineRaceResults._resolve_starting_positions_pitlane_starts(df)
 
-    assert result[df["driverId"] == "zhou"].iloc[0] == 20
+    assert result[df["driver_id"] == "zhou"].iloc[0] == 20
     assert result.notna().all()
 
 
@@ -55,7 +55,7 @@ def test_pit_lane_start_accepts_string_grid_from_bronze():
 
     result = SilverPipelineRaceResults._resolve_starting_positions_pitlane_starts(df)
 
-    assert result[df["driverId"] == "zhou"].iloc[0] == 20
+    assert result[df["driver_id"] == "zhou"].iloc[0] == 20
 
 
 def test_multiple_pit_lane_starts_share_last_grid_slot():
@@ -72,7 +72,7 @@ def test_multiple_pit_lane_starts_share_last_grid_slot():
     df = pd.DataFrame(rows)
 
     result = SilverPipelineRaceResults._resolve_starting_positions_pitlane_starts(df)
-    pit_starts = result[df["driverId"].isin(["stroll", "vettel"])]
+    pit_starts = result[df["driver_id"].isin(["stroll", "vettel"])]
 
     assert len(df) == 20
     assert pit_starts.tolist() == [20, 20]
@@ -94,8 +94,8 @@ def test_normal_grid_positions_unchanged():
 
     result = SilverPipelineRaceResults._resolve_starting_positions_pitlane_starts(df)
 
-    assert result[df["driverId"] == "max_verstappen"].iloc[0] == 1
-    assert result[df["driverId"] == "perez"].iloc[0] == 5
+    assert result[df["driver_id"] == "max_verstappen"].iloc[0] == 1
+    assert result[df["driver_id"] == "perez"].iloc[0] == 5
 
 
 def test_silver_schema_rejects_null_starting_position():
@@ -104,13 +104,13 @@ def test_silver_schema_rejects_null_starting_position():
             {
                 "season": 2024,
                 "round": 1,
-                "circuitId": "test_circuit",
+                "circuit_id": "test_circuit",
                 "position": 1,
                 "points": 25.0,
                 "starting_position": pd.NA,
                 "status": "Finished",
-                "driverId": "driver_a",
-                "constructorId": "test_team",
+                "driver_id": "driver_a",
+                "constructor_id": "test_team",
             }
         ]
     )

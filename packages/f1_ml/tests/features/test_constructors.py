@@ -12,7 +12,7 @@ from f1_ml.features.drivers import add_driver_qualifying_career_median
 
 
 def team_value(df: pd.DataFrame, constructor_id: str, round_num: int, column: str):
-    mask = (df["constructorId"] == constructor_id) & (df["round"] == round_num)
+    mask = (df["constructor_id"] == constructor_id) & (df["round"] == round_num)
     return df.loc[mask, column].iloc[0]
 
 

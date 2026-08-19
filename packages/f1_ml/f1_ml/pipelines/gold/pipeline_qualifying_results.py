@@ -25,12 +25,12 @@ class GoldPipelineQualifyingResults:
         Read the silver data.
         """
 
-        df_race_results = self.storage_backend.read("silver/race_results")
-        df_qualifying_results = self.storage_backend.read("silver/qualifying_results")
+        df_race_results = self.storage_backend.read("silver", "race_results")
+        df_qualifying_results = self.storage_backend.read("silver", "qualifying_results")
         df = pd.merge(
             df_race_results,
             df_qualifying_results,
-            on=["season", "round", "driverId", "constructorId", "circuitId"],
+            on=["season", "round", "driver_id", "constructor_id", "circuit_id"],
             how="inner",
         )
 
@@ -50,7 +50,7 @@ class GoldPipelineQualifyingResults:
         """
         Write the gold data.
         """
-        self.storage_backend.write("gold/qualifying_results/data", df)
+        self.storage_backend.write("gold", "qualifying_results", df)
 
     def _validate_gold_schema(self, df: pd.DataFrame) -> pd.DataFrame:
         """

@@ -7,18 +7,18 @@ class LocalStorageBackend(StorageBackend):
     def __init__(self, root):
         self.root = root
 
-    def read(self, dataset: str) -> pd.DataFrame:
+    def read(self, schema: str, table: str) -> pd.DataFrame:
         """
         Read a dataset from the local storage.
         """
         from glob import glob
 
-        path_to_dataset = self.root / dataset
+        path_to_dataset = self.root / schema / table
         glob_pattern = path_to_dataset / "*.json"
         files = glob(str(glob_pattern))
 
         if len(files) == 0:
-            raise FileNotFoundError(f"No files found for dataset: {dataset}")
+            raise FileNotFoundError(f"No files found for dataset: {schema}/{table}")
         else:
             df_final = pd.DataFrame()
             for file in files:
@@ -27,5 +27,5 @@ class LocalStorageBackend(StorageBackend):
 
         return df_final
 
-    def write(self, dataset: str, df: pd.DataFrame) -> None:
-        df.to_json(f"{self.root}/{dataset}.json", orient="records", date_format="iso")
+    def write(self, schema: str, table: str, df: pd.DataFrame) -> None:
+        df.to_json(f"{self.root}/{schema}/{table}.json", orient="records", date_format="iso")

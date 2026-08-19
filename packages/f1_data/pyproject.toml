@@ -10,7 +10,9 @@ dependencies = [
     "numpy",
     "pandas",
     "pandera",
+    "psycopg[binary]",
     "requests",
+    "sqlalchemy",
 ]
 
 [tool.hatch.build.targets.wheel]

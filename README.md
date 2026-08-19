@@ -44,6 +44,8 @@ Both models are XGBoost regressors (`reg:absoluteerror`), logged to MLflow with 
 
 **Dev container (recommended)** — opens with dependencies via `uv sync`, Postgres + MinIO + MLflow sidecars. MLflow UI: `http://localhost:5001`, MinIO console: `http://localhost:9001` (login `minioadmin` / `minioadmin`).
 
+Postgres hosts two databases on one instance: `mlflow` (tracking) and `f1_predictor` (bronze/silver/gold tables). Both users, databases, and F1 DDL are created by `.devcontainer/init-postgres.sh` on a **fresh** volume only. After pulling this layout, recreate the `postgres-data` volume (or run that script by hand against an existing instance) so the init runs again.
+
 **Manual setup:**
 
 ```bash
@@ -133,6 +135,7 @@ f1_predictor/
 | `MLFLOW_TRACKING_URI` | Default `http://mlflow:5000` in devcontainer; `http://localhost:5001` when port-forwarded locally |
 | `MLFLOW_S3_ENDPOINT_URL` | Default `http://minio:9000` in devcontainer (MinIO artifact store) |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | MinIO credentials in devcontainer (`minioadmin` / `minioadmin`) |
+| `F1_DATABASE_URL` | Postgres URL for F1 tables. Default `postgresql://f1_predictor:f1_predictor@postgres:5432/f1_predictor` in the devcontainer |
 | `F1_REPO_ROOT` | Optional override for repo root detection (used by path config) |
 
 Backfill start year: `packages/f1_data/f1_data/config/constants.py` (`DATA_START_BACKFILL = 2022`, used when `extract_bronze_data(backfill=True)`).

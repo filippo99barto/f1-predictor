@@ -9,8 +9,8 @@ class GoldSchemaRaceResults(pa.DataFrameModel):
     season: Series[int] = pa.Field(ge=1950)
     round: Series[int] = pa.Field(ge=1)
     status: Series[str]
-    driverId: Series[str]
-    constructorId: Series[str]
+    driver_id: Series[str]
+    constructor_id: Series[str]
     # features
     starting_position: Series[int] = pa.Field(ge=1)
     qualifying_position: Series[int] = pa.Field(ge=1)
@@ -40,8 +40,8 @@ class GoldSchemaQualifyingResults(pa.DataFrameModel):
 
     season: Series[int] = pa.Field(ge=1950)
     round: Series[int] = pa.Field(ge=1)
-    driverId: Series[str]
-    constructorId: Series[str]
+    driver_id: Series[str]
+    constructor_id: Series[str]
     # features
     driver_positions_gained_season_median: Series[float]
     driver_positions_gained_career_median: Series[float]

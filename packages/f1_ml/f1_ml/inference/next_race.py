@@ -2,12 +2,12 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from f1_data.config.paths import LOCAL_DATA_DIR
-from f1_data.storage.local_storage_backend import LocalStorageBackend
+from f1_data.storage.postgres_storage_backend import get_storage_backend
+from f1_data.storage.storage_backend import StorageBackend
 from f1_ml.models.race_results.train import load_training_data as load_race_gold
 from f1_ml.models.training.splits import get_last_completed_race
 
-MERGE_KEYS = ["season", "round", "driverId", "constructorId", "circuitId"]
+MERGE_KEYS = ["season", "round", "driver_id", "constructor_id", "circuit_id"]
 
 
 @dataclass
@@ -19,14 +19,13 @@ class RaceInfo:
     date: str | None = None
 
 
-def _storage() -> LocalStorageBackend:
-    return LocalStorageBackend(LOCAL_DATA_DIR)
+def _storage() -> StorageBackend:
+    return get_storage_backend()
 
 
 def load_race_schedule(season: int | None = None) -> pd.DataFrame:
     """Load and normalize the race calendar from bronze."""
-    df = _storage().read("bronze/races")
-    df = df.rename(columns=lambda col: col.split(".")[-1])
+    df = _storage().read("bronze", "races")
     df["season"] = df["season"].astype(int)
     df["round"] = df["round"].astype(int)
     if season is not None:
@@ -43,8 +42,6 @@ def resolve_target_race(
     round_num: int | None = None,
 ) -> RaceInfo:
     """Resolve the target race from explicit args or the next race after last completed."""
-    last_season, last_round = get_last_completed_race_from_gold()
-
     if season is not None and round_num is not None:
         schedule = load_race_schedule(season)
         match = schedule[(schedule["season"] == season) & (schedule["round"] == round_num)]
@@ -54,11 +51,12 @@ def resolve_target_race(
         return RaceInfo(
             season=season,
             round=round_num,
-            race_name=row["raceName"],
-            circuit_id=row["circuitId"],
+            race_name=row["race_name"],
+            circuit_id=row["circuit_id"],
             date=row.get("date"),
         )
 
+    last_season, last_round = get_last_completed_race_from_gold()
     schedule = load_race_schedule()
     upcoming = schedule[
         (schedule["season"] > last_season)
@@ -71,15 +69,15 @@ def resolve_target_race(
     return RaceInfo(
         season=int(row["season"]),
         round=int(row["round"]),
-        race_name=row["raceName"],
-        circuit_id=row["circuitId"],
+        race_name=row["race_name"],
+        circuit_id=row["circuit_id"],
         date=row.get("date"),
     )
 
 
 def get_driver_lineup(season: int, round_num: int) -> pd.DataFrame:
     """Drivers from the most recent completed silver race before the target."""
-    race_df = _storage().read("silver/race_results")
+    race_df = _storage().read("silver", "race_results")
     race_df["season"] = race_df["season"].astype(int)
     race_df["round"] = race_df["round"].astype(int)
 
@@ -94,7 +92,7 @@ def get_driver_lineup(season: int, round_num: int) -> pd.DataFrame:
     last_round = int(completed.loc[completed["season"] == last_season, "round"].max())
     latest = completed[(completed["season"] == last_season) & (completed["round"] == last_round)]
 
-    return latest[["driverId", "constructorId"]].drop_duplicates().reset_index(drop=True)
+    return latest[["driver_id", "constructor_id"]].drop_duplicates().reset_index(drop=True)
 
 
 def build_scaffold_rows(
@@ -107,7 +105,7 @@ def build_scaffold_rows(
     scaffolds = lineup.copy()
     scaffolds["season"] = season
     scaffolds["round"] = round_num
-    scaffolds["circuitId"] = circuit_id
+    scaffolds["circuit_id"] = circuit_id
     scaffolds["position"] = pd.NA
     scaffolds["points"] = pd.NA
     scaffolds["starting_position"] = pd.NA
@@ -126,8 +124,8 @@ def build_inference_frames(
 ) -> pd.DataFrame:
     """Load silver history, merge, and append scaffold rows for the target race."""
     storage = _storage()
-    race_df = storage.read("silver/race_results")
-    quali_df = storage.read("silver/qualifying_results")
+    race_df = storage.read("silver", "race_results")
+    quali_df = storage.read("silver", "qualifying_results")
 
     merged = pd.merge(race_df, quali_df, on=MERGE_KEYS, how="inner", suffixes=("", "_quali"))
     merged = merged.drop(

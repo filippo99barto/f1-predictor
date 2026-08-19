@@ -15,7 +15,7 @@ class SilverPipelineQualifyingResults:
         df = self._read_bronze_data()
         df = self._transform_bronze_data(df)
 
-        self._validate_silver_schema(df)
+        df = self._validate_silver_schema(df)
         self._write_silver_data(df)
 
         return df
@@ -24,21 +24,19 @@ class SilverPipelineQualifyingResults:
         """
         Read the bronze data.
         """
-        df_races = self.storage_backend.read("bronze/races")
-        df_qualifying = self.storage_backend.read("bronze/qualifying_results")
+        df_races = self.storage_backend.read("bronze", "races")
+        df_qualifying = self.storage_backend.read("bronze", "qualifying_results")
 
         return df_races.merge(df_qualifying, on=["season", "round"], how="inner")
 
     def _transform_bronze_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Transform the bronze data."""
 
-        df = df.rename(columns=lambda col: col.split(".")[-1]).rename(
-            columns={"position": "qualifying_position"}
-        )
+        df = df.rename(columns={"position": "qualifying_position"})
 
-        df["q1_seconds"] = df["Q1"].apply(self.parse_lap_time)
-        df["q2_seconds"] = df["Q2"].apply(self.parse_lap_time)
-        df["q3_seconds"] = df["Q3"].apply(self.parse_lap_time)
+        df["q1_seconds"] = df["q1"].apply(self.parse_lap_time)
+        df["q2_seconds"] = df["q2"].apply(self.parse_lap_time)
+        df["q3_seconds"] = df["q3"].apply(self.parse_lap_time)
 
         schema_columns = list(SilverSchemaQualifyingResults.to_schema().columns)
         return df[schema_columns]
@@ -50,7 +48,7 @@ class SilverPipelineQualifyingResults:
 
     def _write_silver_data(self, df: pd.DataFrame) -> None:
         """Write the silver data."""
-        self.storage_backend.write("silver/qualifying_results/data", df)
+        self.storage_backend.write("silver", "qualifying_results", df)
 
     @staticmethod
     def parse_lap_time(t: str) -> float | None:

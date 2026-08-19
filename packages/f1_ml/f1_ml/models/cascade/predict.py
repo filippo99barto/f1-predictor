@@ -58,9 +58,9 @@ class PredictionResult:
         for _, row in preds.iterrows():
             rows.append(
                 {
-                    "driver_id": row["driverId"],
-                    "driver_name": format_driver_id(row["driverId"]),
-                    "constructor_id": row["constructorId"],
+                    "driver_id": row["driver_id"],
+                    "driver_name": format_driver_id(row["driver_id"]),
+                    "constructor_id": row["constructor_id"],
                     "predicted_qualifying_position": float(row["predicted_qualifying_position"]),
                     "predicted_race_position": float(row["predicted_race_position"]),
                 }
@@ -96,8 +96,8 @@ def _predictable_rows(
             null_features = null_cols[null_cols].index.tolist()
             logger.warning(
                 "Dropped driver %s (%s) at %s stage: missing %s",
-                row["driverId"],
-                row.get("constructorId", "unknown"),
+                row["driver_id"],
+                row.get("constructor_id", "unknown"),
                 stage,
                 null_features,
             )
@@ -138,9 +138,9 @@ def predict_next_race(
 
     merged_for_race = merged.copy()
     target_mask = target_race_mask(merged_for_race, race_info.season, race_info.round)
-    quali_lookup = qualy_predictions.set_index("driverId")["predicted_qualifying_position"]
+    quali_lookup = qualy_predictions.set_index("driver_id")["predicted_qualifying_position"]
     for driver_id, predicted_quali in quali_lookup.items():
-        driver_mask = target_mask & (merged_for_race["driverId"] == driver_id)
+        driver_mask = target_mask & (merged_for_race["driver_id"] == driver_id)
         merged_for_race.loc[driver_mask, "qualifying_position"] = float(predicted_quali)
 
     race_features = build_race_results_features(merged_for_race, for_inference=True)
@@ -155,17 +155,17 @@ def predict_next_race(
         race_x[col] = pd.to_numeric(race_x[col], errors="coerce")
     race_pred = race_model.predict(race_x)
 
-    predictions = target_race[["driverId", "constructorId"]].copy()
+    predictions = target_race[["driver_id", "constructor_id"]].copy()
     predictions = predictions.merge(
-        qualy_predictions[["driverId", "predicted_qualifying_position"]],
-        on="driverId",
+        qualy_predictions[["driver_id", "predicted_qualifying_position"]],
+        on="driver_id",
         how="left",
     )
     predictions["predicted_race_position"] = race_pred
     predictions = predictions.sort_values("predicted_race_position").reset_index(drop=True)
 
-    winner = predictions.iloc[0]["driverId"]
-    podium = predictions.head(3)["driverId"].tolist()
+    winner = predictions.iloc[0]["driver_id"]
+    podium = predictions.head(3)["driver_id"].tolist()
 
     return PredictionResult(
         season=race_info.season,

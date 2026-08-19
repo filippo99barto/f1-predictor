@@ -26,22 +26,22 @@ FAKE_SCHEDULE = pd.DataFrame(
         {
             "season": 2026,
             "round": 9,
-            "raceName": "Hungarian Grand Prix",
-            "circuitId": "hungaroring",
+            "race_name": "Hungarian Grand Prix",
+            "circuit_id": "hungaroring",
             "date": "2026-07-27",
         },
         {
             "season": 2026,
             "round": 10,
-            "raceName": "Belgian Grand Prix",
-            "circuitId": "spa",
+            "race_name": "Belgian Grand Prix",
+            "circuit_id": "spa",
             "date": "2026-08-03",
         },
         {
             "season": 2026,
             "round": 11,
-            "raceName": "Dutch Grand Prix",
-            "circuitId": "zandvoort",
+            "race_name": "Dutch Grand Prix",
+            "circuit_id": "zandvoort",
             "date": "2026-08-17",
         },
     ]
@@ -52,9 +52,9 @@ FAKE_SILVER_RACE_RESULTS = pd.DataFrame(
         {
             "season": 2026,
             "round": 9,
-            "driverId": f"driver_{i:02d}",
-            "constructorId": f"team_{i % 11}",
-            "circuitId": "hungaroring",
+            "driver_id": f"driver_{i:02d}",
+            "constructor_id": f"team_{i % 11}",
+            "circuit_id": "hungaroring",
             "position": i + 1,
         }
         for i in range(22)
@@ -71,9 +71,9 @@ def _fake_inference_frames(season: int, round_num: int, circuit_id: str) -> pd.D
                 {
                     "season": season,
                     "round": race_round,
-                    "driverId": f"driver_{i:02d}",
-                    "constructorId": f"team_{i % 11}",
-                    "circuitId": "hungaroring" if race_round % 2 else "monaco",
+                    "driver_id": f"driver_{i:02d}",
+                    "constructor_id": f"team_{i % 11}",
+                    "circuit_id": "hungaroring" if race_round % 2 else "monaco",
                     "position": position,
                     "starting_position": position,
                     "qualifying_position": position,
@@ -90,9 +90,9 @@ def _fake_inference_frames(season: int, round_num: int, circuit_id: str) -> pd.D
             {
                 "season": season,
                 "round": round_num,
-                "driverId": f"driver_{i:02d}",
-                "constructorId": f"team_{i % 11}",
-                "circuitId": circuit_id,
+                "driver_id": f"driver_{i:02d}",
+                "constructor_id": f"team_{i % 11}",
+                "circuit_id": circuit_id,
                 "position": float("nan"),
                 "starting_position": float("nan"),
                 "qualifying_position": float("nan"),
@@ -137,9 +137,9 @@ def test_get_driver_lineup_returns_full_grid(mock_storage):
     lineup = get_driver_lineup(2026, 10)
 
     assert len(lineup) == 22
-    assert "driverId" in lineup.columns
-    assert "constructorId" in lineup.columns
-    assert lineup["driverId"].is_unique
+    assert "driver_id" in lineup.columns
+    assert "constructor_id" in lineup.columns
+    assert lineup["driver_id"].is_unique
 
 
 @patch("f1_ml.inference.next_race._storage")
@@ -173,5 +173,5 @@ def test_predict_next_race_smoke(mock_resolve, mock_frames):
     assert result.race_name == "Belgian Grand Prix"
     assert result.circuit_id == "spa"
     assert len(result.predictions) >= 20
-    assert result.winner in result.predictions["driverId"].values
+    assert result.winner in result.predictions["driver_id"].values
     assert len(result.podium) == 3

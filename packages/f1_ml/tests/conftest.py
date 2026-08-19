@@ -7,9 +7,9 @@ def race_df() -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
-                "driverId": "driver_a",
-                "constructorId": "red_bull",
-                "circuitId": "bahrain",
+                "driver_id": "driver_a",
+                "constructor_id": "red_bull",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 1,
                 "position": 3,
@@ -17,9 +17,9 @@ def race_df() -> pd.DataFrame:
                 "qualifying_position": 2,
             },
             {
-                "driverId": "driver_a",
-                "constructorId": "red_bull",
-                "circuitId": "jeddah",
+                "driver_id": "driver_a",
+                "constructor_id": "red_bull",
+                "circuit_id": "jeddah",
                 "season": 2024,
                 "round": 2,
                 "position": 1,
@@ -27,9 +27,9 @@ def race_df() -> pd.DataFrame:
                 "qualifying_position": 1,
             },
             {
-                "driverId": "driver_a",
-                "constructorId": "red_bull",
-                "circuitId": "bahrain",
+                "driver_id": "driver_a",
+                "constructor_id": "red_bull",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 3,
                 "position": 2,
@@ -37,9 +37,9 @@ def race_df() -> pd.DataFrame:
                 "qualifying_position": 3,
             },
             {
-                "driverId": "driver_b",
-                "constructorId": "red_bull",
-                "circuitId": "bahrain",
+                "driver_id": "driver_b",
+                "constructor_id": "red_bull",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 1,
                 "position": 1,
@@ -47,9 +47,9 @@ def race_df() -> pd.DataFrame:
                 "qualifying_position": 1,
             },
             {
-                "driverId": "driver_b",
-                "constructorId": "red_bull",
-                "circuitId": "jeddah",
+                "driver_id": "driver_b",
+                "constructor_id": "red_bull",
+                "circuit_id": "jeddah",
                 "season": 2024,
                 "round": 2,
                 "position": 4,
@@ -57,9 +57,9 @@ def race_df() -> pd.DataFrame:
                 "qualifying_position": 3,
             },
             {
-                "driverId": "driver_b",
-                "constructorId": "red_bull",
-                "circuitId": "bahrain",
+                "driver_id": "driver_b",
+                "constructor_id": "red_bull",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 3,
                 "position": 5,
@@ -67,9 +67,9 @@ def race_df() -> pd.DataFrame:
                 "qualifying_position": 4,
             },
             {
-                "driverId": "driver_c",
-                "constructorId": "ferrari",
-                "circuitId": "bahrain",
+                "driver_id": "driver_c",
+                "constructor_id": "ferrari",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 1,
                 "position": 2,
@@ -77,9 +77,9 @@ def race_df() -> pd.DataFrame:
                 "qualifying_position": 3,
             },
             {
-                "driverId": "driver_c",
-                "constructorId": "ferrari",
-                "circuitId": "jeddah",
+                "driver_id": "driver_c",
+                "constructor_id": "ferrari",
+                "circuit_id": "jeddah",
                 "season": 2024,
                 "round": 2,
                 "position": 3,
@@ -95,9 +95,9 @@ def quali_df() -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
-                "driverId": "driver_a",
-                "constructorId": "red_bull",
-                "circuitId": "bahrain",
+                "driver_id": "driver_a",
+                "constructor_id": "red_bull",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 1,
                 "qualifying_position": 2,
@@ -108,9 +108,9 @@ def quali_df() -> pd.DataFrame:
                 "starting_position": 2,
             },
             {
-                "driverId": "driver_a",
-                "constructorId": "red_bull",
-                "circuitId": "jeddah",
+                "driver_id": "driver_a",
+                "constructor_id": "red_bull",
+                "circuit_id": "jeddah",
                 "season": 2024,
                 "round": 2,
                 "qualifying_position": 1,
@@ -121,9 +121,9 @@ def quali_df() -> pd.DataFrame:
                 "starting_position": 1,
             },
             {
-                "driverId": "driver_a",
-                "constructorId": "red_bull",
-                "circuitId": "bahrain",
+                "driver_id": "driver_a",
+                "constructor_id": "red_bull",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 3,
                 "qualifying_position": 3,
@@ -134,9 +134,9 @@ def quali_df() -> pd.DataFrame:
                 "starting_position": 3,
             },
             {
-                "driverId": "driver_b",
-                "constructorId": "red_bull",
-                "circuitId": "bahrain",
+                "driver_id": "driver_b",
+                "constructor_id": "red_bull",
+                "circuit_id": "bahrain",
                 "season": 2024,
                 "round": 1,
                 "qualifying_position": 1,
@@ -147,9 +147,9 @@ def quali_df() -> pd.DataFrame:
                 "starting_position": 1,
             },
             {
-                "driverId": "driver_b",
-                "constructorId": "red_bull",
-                "circuitId": "jeddah",
+                "driver_id": "driver_b",
+                "constructor_id": "red_bull",
+                "circuit_id": "jeddah",
                 "season": 2024,
                 "round": 2,
                 "qualifying_position": 3,
@@ -164,5 +164,5 @@ def quali_df() -> pd.DataFrame:
 
 
 def row_value(df: pd.DataFrame, driver_id: str, round_num: int, column: str):
-    mask = (df["driverId"] == driver_id) & (df["round"] == round_num)
+    mask = (df["driver_id"] == driver_id) & (df["round"] == round_num)
     return df.loc[mask, column].iloc[0]

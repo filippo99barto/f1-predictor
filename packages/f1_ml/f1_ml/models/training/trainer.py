@@ -7,8 +7,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 from xgboost import XGBRegressor
 
-from f1_data.config.paths import LOCAL_DATA_DIR
-from f1_data.storage.local_storage_backend import LocalStorageBackend
+from f1_data.storage.postgres_storage_backend import get_storage_backend
 from f1_ml.config.paths import LOCAL_MODELS_DIR
 from f1_ml.models.training.config import ModelTrainConfig
 from f1_ml.models.training.metrics import baseline_mae, mae_slices
@@ -24,8 +23,8 @@ SKOPS_TRUSTED_TYPES = ["xgboost.sklearn.XGBRegressor", "xgboost.core.Booster"]
 
 
 def load_training_data(config: ModelTrainConfig) -> pd.DataFrame:
-    storage_backend = LocalStorageBackend(LOCAL_DATA_DIR)
-    df = storage_backend.read(config.gold_path)
+    storage_backend = get_storage_backend()
+    df = storage_backend.read(config.gold_schema, config.gold_table)
     return df.dropna(subset=config.feature_cols)
 
 

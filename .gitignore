@@ -5,6 +5,7 @@ __pycache__/
 .DS_Store
 .env
 datasets/
+import_json_to_postgres.py
 *.pkl
 plans/
 .ruff_cache/
