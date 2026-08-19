@@ -10,7 +10,11 @@ from f1_ml.inference.next_race import (
     target_race_mask,
 )
 from f1_ml.models.common.load import load_model
-from f1_ml.models.common.predict import drop_incomplete_feature_rows, format_driver_id
+from f1_ml.models.common.predict import (
+    drop_incomplete_feature_rows,
+    feature_context,
+    format_driver_id,
+)
 from f1_ml.models.qualifying.features import build_qualifying_results_features
 from f1_ml.models.qualifying.train import FEATURE_COLS, MODEL_NAME
 
@@ -39,6 +43,7 @@ class QualifyingPredictionResult:
                     "driver_name": format_driver_id(row["driver_id"]),
                     "constructor_id": row["constructor_id"],
                     "predicted_qualifying_position": float(row["predicted_qualifying_position"]),
+                    "features": feature_context(row, FEATURE_COLS),
                 }
             )
 
@@ -69,7 +74,7 @@ def predict_qualifying_frame(race_info: RaceInfo, merged: pd.DataFrame) -> pd.Da
         raise ValueError("No drivers with complete qualifying features for target race.")
 
     qualy_pred = qualy_model.predict(target_qualy[FEATURE_COLS])
-    return target_qualy[ID_COLS].assign(predicted_qualifying_position=qualy_pred)
+    return target_qualy[ID_COLS + FEATURE_COLS].assign(predicted_qualifying_position=qualy_pred)
 
 
 def predict_next_qualifying(

@@ -5,7 +5,11 @@ import pandas as pd
 
 from f1_ml.inference.next_race import build_inference_frames, resolve_target_race, target_race_mask
 from f1_ml.models.common.load import load_model
-from f1_ml.models.common.predict import drop_incomplete_feature_rows, format_driver_id
+from f1_ml.models.common.predict import (
+    drop_incomplete_feature_rows,
+    feature_context,
+    format_driver_id,
+)
 from f1_ml.models.qualifying.predict import predict_qualifying_frame
 from f1_ml.models.race.features import build_race_results_features
 from f1_ml.models.race.train import FEATURE_COLS, MODEL_NAME
@@ -38,6 +42,7 @@ class RacePredictionResult:
                     "constructor_id": row["constructor_id"],
                     "predicted_qualifying_position": float(row["predicted_qualifying_position"]),
                     "predicted_race_position": float(row["predicted_race_position"]),
+                    "features": feature_context(row, FEATURE_COLS),
                 }
             )
 
@@ -116,7 +121,7 @@ def predict_next_race(
         race_x[col] = pd.to_numeric(race_x[col], errors="coerce")
     race_pred = race_model.predict(race_x)
 
-    predictions = target_race[["driver_id", "constructor_id"]].copy()
+    predictions = target_race[["driver_id", "constructor_id", *FEATURE_COLS]].copy()
     predictions = predictions.merge(
         qualy_predictions[["driver_id", "predicted_qualifying_position"]],
         on="driver_id",

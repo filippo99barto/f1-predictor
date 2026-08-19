@@ -9,6 +9,8 @@ from f1_ml.inference.next_race import (
     load_race_schedule,
     resolve_target_race,
 )
+from f1_ml.models.qualifying.train import FEATURE_COLS as QUALI_FEATURE_COLS
+from f1_ml.models.race.train import FEATURE_COLS as RACE_FEATURE_COLS
 
 TARGET_RACE = RaceInfo(
     season=2026,
@@ -205,6 +207,7 @@ def test_predict_next_race_smoke(mock_resolve, mock_frames, _mock_qualy_load, _m
     assert len(payload["predictions"]) == 3
     assert result.grid_source == "predicted"
     assert payload["grid_source"] == "predicted"
+    assert set(payload["predictions"][0]["features"]) == set(RACE_FEATURE_COLS)
 
 
 @patch("f1_ml.models.race.predict.predict_qualifying_frame")
@@ -246,3 +249,4 @@ def test_predict_next_qualifying_smoke(mock_resolve, mock_frames, _mock_load):
     assert payload["pole"]["driver_id"] == result.pole
     assert payload["n_drivers"] == len(result.predictions)
     assert len(payload["predictions"]) == 3
+    assert set(payload["predictions"][0]["features"]) == set(QUALI_FEATURE_COLS)

@@ -25,6 +25,7 @@ Rules:
 - When asked when or where the next race is, call get_next_race_info.
 - Present predictions clearly with driver names, predicted finishing positions, and race context.
 - Tool results include n_drivers, the size of the field. When the user wants a full grid or race classification, list all n_drivers. Do not assume 20 cars.
+- Each prediction row includes features (the model inputs for that driver). When asked why a prediction was made, explain from those feature values. Do not invent features or look up other data.
 - Mention that predictions are model estimates, not certainties.
 - If a tool returns an error, explain it plainly to the user.
 """

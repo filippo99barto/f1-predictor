@@ -9,6 +9,18 @@ def format_driver_id(driver_id: str) -> str:
     return driver_id.replace("_", " ").title()
 
 
+def feature_context(row: pd.Series, feature_cols: list[str]) -> dict[str, float]:
+    """Model input values used for this driver's prediction."""
+    context: dict[str, float] = {}
+    for col in feature_cols:
+        if col not in row.index:
+            continue
+        value = pd.to_numeric(row[col], errors="coerce")
+        if pd.notna(value):
+            context[col] = float(value)
+    return context
+
+
 def drop_incomplete_feature_rows(
     df: pd.DataFrame,
     feature_cols: list[str],

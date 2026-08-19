@@ -49,7 +49,9 @@ def predict_next_qualifying(
 
     Use for pole, grid, or qualifying questions. Does not predict the race.
     The result includes n_drivers, the full field size — display that many
-    names for a complete grid. Do not assume a 20-car field.
+    names for a complete grid. Do not assume a 20-car field. Each prediction
+    includes features, the model inputs used for that driver. Use those values
+    when asked why a driver is predicted where they are.
 
     Args:
         season: Season year (optional; defaults to next race after latest results).
@@ -77,7 +79,9 @@ def predict_next_race(
     qualifying results are already available; otherwise predicts qualifying
     internally. Do not call predict_next_qualifying first. The result includes
     n_drivers, the full field size — display that many names for a complete
-    classification. Do not assume a 20-car field.
+    classification. Do not assume a 20-car field. Each prediction includes
+    features, the model inputs used for that driver. Use those values when asked
+    why a driver is predicted where they are.
 
     Args:
         season: Season year (optional; defaults to next race after latest results).
