@@ -56,10 +56,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync --all-packages
 ```
 
-Optional `.env` for the assistant:
+Optional `.env` for the assistant (copy `.env.example` to `.env`):
 
 ```
-GEMINI_API_KEY=your_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 **Train end-to-end** — run `notebooks/train.ipynb` (bronze → silver → gold → train → cascade eval).

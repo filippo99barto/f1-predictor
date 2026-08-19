@@ -13,7 +13,7 @@ why = ask("Why that driver?")  # same conversation; sees prior tool results
 
 Follow-ups reuse an in-memory thread (`thread_id="default"`). Pass a new `thread_id` to start a fresh conversation.
 
-Requires `GEMINI_API_KEY` in the environment or repo-root `.env`.
+Requires `GEMINI_API_KEY` in the environment or repo-root `.env` (copy from `.env.example`).
 
 ## Chat UI
 
