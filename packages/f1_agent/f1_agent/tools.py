@@ -13,7 +13,9 @@ def get_next_race_info(
     season: int | None = None,
     round: int | None = None,
 ) -> dict[str, Any]:
-    """Get schedule metadata for the next upcoming F1 race without running predictions.
+    """Get schedule metadata for the next upcoming F1 race.
+
+    Does not run predictions.
 
     Args:
         season: Season year (optional).
@@ -43,12 +45,17 @@ def predict_next_qualifying(
     round: int | None = None,
     top_n: int | None = None,
 ) -> dict[str, Any]:
-    """Predict qualifying / grid positions for the next upcoming F1 race or a specific season/round. Use for pole, grid, or qualifying questions. Does not predict the race. The result includes n_drivers, the full field size — display that many names for a complete grid. Do not assume a 20-car field.
+    """Predict qualifying / grid positions for the next upcoming F1 race.
+
+    Use for pole, grid, or qualifying questions. Does not predict the race.
+    The result includes n_drivers, the full field size — display that many
+    names for a complete grid. Do not assume a 20-car field.
 
     Args:
         season: Season year (optional; defaults to next race after latest results).
         round: Round number (optional; requires season if set).
-        top_n: Number of top qualifiers to include. Omit for the full field (see n_drivers in the result).
+        top_n: Number of top qualifiers to include. Omit for the full field
+            (see n_drivers in the result).
     """
     try:
         result = run_predict_next_qualifying(season=season, round_num=round)
@@ -64,12 +71,19 @@ def predict_next_race(
     round: int | None = None,
     top_n: int | None = None,
 ) -> dict[str, Any]:
-    """Predict race finishing positions for the next upcoming F1 race or a specific season/round. Use for win, podium, or race-result questions. Uses Saturday's grid when qualifying results are already available; otherwise predicts qualifying internally. Do not call predict_next_qualifying first. The result includes n_drivers, the full field size — display that many names for a complete classification. Do not assume a 20-car field.
+    """Predict race finishing positions for the next upcoming F1 race.
+
+    Use for win, podium, or race-result questions. Uses Saturday's grid when
+    qualifying results are already available; otherwise predicts qualifying
+    internally. Do not call predict_next_qualifying first. The result includes
+    n_drivers, the full field size — display that many names for a complete
+    classification. Do not assume a 20-car field.
 
     Args:
         season: Season year (optional; defaults to next race after latest results).
         round: Round number (optional; requires season if set).
-        top_n: Number of top finishers to include. Omit for the full field (see n_drivers in the result).
+        top_n: Number of top finishers to include. Omit for the full field
+            (see n_drivers in the result).
     """
     try:
         result = run_predict_next_race(season=season, round_num=round)
