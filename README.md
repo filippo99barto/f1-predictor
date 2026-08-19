@@ -21,7 +21,7 @@ flowchart TB
     Server --> UI[Chat UI]
 ```
 
-At inference time grid order is unknown, so the quali model runs first. Its predictions are written into `qualifying_position`, then the race model predicts finishing positions. See `packages/f1_ml/f1_ml/models/qualifying/predict.py`, `packages/f1_ml/f1_ml/models/race/predict.py`, and `packages/f1_ml/f1_ml/models/evaluate.py`.
+At inference time the race tool uses Saturday's grid when silver qualifying results already exist. If they do not, it runs the quali model and writes those predictions into `qualifying_position` before scoring the race. See `packages/f1_ml/f1_ml/models/race/predict.py`.
 
 ## Pipeline & models
 
@@ -32,7 +32,7 @@ At inference time grid order is unknown, so the quali model runs first. Its pred
 | **Gold** | Silver inner-join + engineered features for training |
 | **Quali model** | 8 features → `qualifying_position` |
 | **Race model** | 11 features → `position` (grid input: `qualifying_position` only) |
-| **Cascade** | Quali predictions fed into race model at inference/eval |
+| **Race inference** | Real Saturday grid when available, else predicted grid |
 
 Features live in `packages/f1_ml/f1_ml/models/common/features/` (shared primitives) and `packages/f1_ml/f1_ml/models/{qualifying,race}/features.py` (model recipes). All use lag/shift to avoid leakage; missing values on first circuit visits fall back to `qualifying_position`.
 

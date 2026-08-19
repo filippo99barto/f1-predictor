@@ -29,10 +29,14 @@ def test_get_next_race_info_returns_error_on_failure():
 
 def test_predict_next_qualifying_returns_grid():
     result = SimpleNamespace(
-        to_dict=lambda top_n=10: {"pole": "VER", "top_n": top_n},
+        to_dict=lambda top_n=None: {"pole": "VER", "n_drivers": 22, "top_n": top_n},
     )
     with patch("f1_agent.tools.run_predict_next_qualifying", return_value=result):
-        assert predict_next_qualifying.invoke({"top_n": 3}) == {"pole": "VER", "top_n": 3}
+        assert predict_next_qualifying.invoke({"top_n": 3}) == {
+            "pole": "VER",
+            "n_drivers": 22,
+            "top_n": 3,
+        }
 
 
 def test_predict_next_qualifying_returns_error_on_failure():
@@ -45,10 +49,14 @@ def test_predict_next_qualifying_returns_error_on_failure():
 
 def test_predict_next_race_returns_results():
     result = SimpleNamespace(
-        to_dict=lambda top_n=10: {"winner": "VER", "top_n": top_n},
+        to_dict=lambda top_n=None: {"winner": "VER", "n_drivers": 22, "top_n": top_n},
     )
     with patch("f1_agent.tools.run_predict_next_race", return_value=result):
-        assert predict_next_race.invoke({"top_n": 3}) == {"winner": "VER", "top_n": 3}
+        assert predict_next_race.invoke({"top_n": 3}) == {
+            "winner": "VER",
+            "n_drivers": 22,
+            "top_n": 3,
+        }
 
 
 def test_predict_next_race_returns_error_on_failure():

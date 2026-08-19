@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 import pandas as pd
 
@@ -9,6 +9,8 @@ from f1_ml.models.common.predict import drop_incomplete_feature_rows, format_dri
 from f1_ml.models.qualifying.predict import predict_qualifying_frame
 from f1_ml.models.race.features import build_race_results_features
 from f1_ml.models.race.train import FEATURE_COLS, MODEL_NAME
+
+MIN_ACTUAL_GRID = 18
 
 
 @dataclass
@@ -20,6 +22,7 @@ class RacePredictionResult:
     predictions: pd.DataFrame
     winner: str
     podium: list[str]
+    grid_source: Literal["actual", "predicted"]
 
     def to_dict(self, *, top_n: int | None = None) -> dict[str, Any]:
         preds = self.predictions.sort_values("predicted_race_position")
@@ -43,6 +46,8 @@ class RacePredictionResult:
             "round": self.round,
             "race_name": self.race_name,
             "circuit_id": self.circuit_id,
+            "grid_source": self.grid_source,
+            "n_drivers": int(len(self.predictions)),
             "winner": {
                 "driver_id": self.winner,
                 "driver_name": format_driver_id(self.winner),
@@ -52,12 +57,31 @@ class RacePredictionResult:
         }
 
 
+def _has_actual_grid(merged: pd.DataFrame, season: int, round_num: int) -> bool:
+    target = merged[target_race_mask(merged, season, round_num)]
+    filled = pd.to_numeric(target["qualifying_position"], errors="coerce").notna().sum()
+    return int(filled) >= MIN_ACTUAL_GRID
+
+
+def _grid_from_actual(merged: pd.DataFrame, season: int, round_num: int) -> pd.DataFrame:
+    target = merged[target_race_mask(merged, season, round_num)]
+    grid = target.loc[
+        pd.to_numeric(target["qualifying_position"], errors="coerce").notna(),
+        ["driver_id", "constructor_id", "qualifying_position"],
+    ].copy()
+    return grid.rename(columns={"qualifying_position": "predicted_qualifying_position"})
+
+
 def predict_next_race(
     *,
     season: int | None = None,
     round_num: int | None = None,
 ) -> RacePredictionResult:
-    """Predict race finishing positions. Runs qualifying internally to fill grid features."""
+    """Predict race finishing positions.
+
+    Uses Saturday's qualifying results when they are already in silver; otherwise runs the
+    qualifying model to fill grid features.
+    """
     race_info = resolve_target_race(season=season, round_num=round_num)
     merged = build_inference_frames(
         race_info.season,
@@ -66,14 +90,19 @@ def predict_next_race(
     )
 
     race_model = load_model(MODEL_NAME)
-    qualy_predictions = predict_qualifying_frame(race_info, merged)
-
     merged_for_race = merged.copy()
     target_mask = target_race_mask(merged_for_race, race_info.season, race_info.round)
-    quali_lookup = qualy_predictions.set_index("driver_id")["predicted_qualifying_position"]
-    for driver_id, predicted_quali in quali_lookup.items():
-        driver_mask = target_mask & (merged_for_race["driver_id"] == driver_id)
-        merged_for_race.loc[driver_mask, "qualifying_position"] = float(predicted_quali)
+
+    if _has_actual_grid(merged_for_race, race_info.season, race_info.round):
+        grid_source: Literal["actual", "predicted"] = "actual"
+        qualy_predictions = _grid_from_actual(merged_for_race, race_info.season, race_info.round)
+    else:
+        grid_source = "predicted"
+        qualy_predictions = predict_qualifying_frame(race_info, merged)
+        quali_lookup = qualy_predictions.set_index("driver_id")["predicted_qualifying_position"]
+        for driver_id, predicted_quali in quali_lookup.items():
+            driver_mask = target_mask & (merged_for_race["driver_id"] == driver_id)
+            merged_for_race.loc[driver_mask, "qualifying_position"] = float(predicted_quali)
 
     race_features = build_race_results_features(merged_for_race, for_inference=True)
     target_race = race_features[target_race_mask(race_features, race_info.season, race_info.round)]
@@ -107,4 +136,5 @@ def predict_next_race(
         predictions=predictions,
         winner=winner,
         podium=podium,
+        grid_source=grid_source,
     )

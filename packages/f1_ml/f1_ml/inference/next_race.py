@@ -8,6 +8,7 @@ from f1_ml.models.common.splits import get_last_completed_race
 from f1_ml.models.race.train import load_training_data as load_race_gold
 
 MERGE_KEYS = ["season", "round", "driver_id", "constructor_id", "circuit_id"]
+QUALI_OVERLAY_COLS = ["qualifying_position", "q1_seconds", "q2_seconds", "q3_seconds"]
 
 
 @dataclass
@@ -75,8 +76,34 @@ def resolve_target_race(
     )
 
 
-def get_driver_lineup(season: int, round_num: int) -> pd.DataFrame:
-    """Drivers from the most recent completed silver race before the target."""
+def _filter_target_qualifying(quali_df: pd.DataFrame, season: int, round_num: int) -> pd.DataFrame:
+    df = quali_df.copy()
+    df["season"] = df["season"].astype(int)
+    df["round"] = df["round"].astype(int)
+    return df[(df["season"] == season) & (df["round"] == round_num)].copy()
+
+
+def load_target_qualifying(season: int, round_num: int) -> pd.DataFrame:
+    """Silver qualifying rows for the target race, if they have been extracted."""
+    return _filter_target_qualifying(
+        _storage().read("silver", "qualifying_results"), season, round_num
+    )
+
+
+def get_driver_lineup(
+    season: int,
+    round_num: int,
+    *,
+    target_quali: pd.DataFrame | None = None,
+) -> pd.DataFrame:
+    """Drivers from Saturday quali if present, otherwise the last completed silver race."""
+    if target_quali is None:
+        target_quali = load_target_qualifying(season, round_num)
+    if not target_quali.empty:
+        return (
+            target_quali[["driver_id", "constructor_id"]].drop_duplicates().reset_index(drop=True)
+        )
+
     race_df = _storage().read("silver", "race_results")
     race_df["season"] = race_df["season"].astype(int)
     race_df["round"] = race_df["round"].astype(int)
@@ -100,8 +127,10 @@ def build_scaffold_rows(
     season: int,
     round_num: int,
     circuit_id: str,
+    *,
+    target_quali: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Placeholder rows for a future race with unknown results."""
+    """Placeholder rows for a future race, overlaying real quali when available."""
     scaffolds = lineup.copy()
     scaffolds["season"] = season
     scaffolds["round"] = round_num
@@ -114,6 +143,15 @@ def build_scaffold_rows(
     scaffolds["q1_seconds"] = pd.NA
     scaffolds["q2_seconds"] = pd.NA
     scaffolds["q3_seconds"] = pd.NA
+
+    if target_quali is None:
+        target_quali = load_target_qualifying(season, round_num)
+    if not target_quali.empty:
+        overlay_cols = [c for c in QUALI_OVERLAY_COLS if c in target_quali.columns]
+        overlay = target_quali[["driver_id", *overlay_cols]].drop_duplicates("driver_id")
+        scaffolds = scaffolds.drop(columns=overlay_cols, errors="ignore")
+        scaffolds = scaffolds.merge(overlay, on="driver_id", how="left")
+
     return scaffolds
 
 
@@ -133,8 +171,11 @@ def build_inference_frames(
         errors="ignore",
     )
 
-    lineup = get_driver_lineup(season, round_num)
-    scaffolds = build_scaffold_rows(lineup, season, round_num, circuit_id)
+    target_quali = _filter_target_qualifying(quali_df, season, round_num)
+    lineup = get_driver_lineup(season, round_num, target_quali=target_quali)
+    scaffolds = build_scaffold_rows(
+        lineup, season, round_num, circuit_id, target_quali=target_quali
+    )
 
     for col in merged.columns:
         if col not in scaffolds.columns:

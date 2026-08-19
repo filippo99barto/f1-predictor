@@ -47,6 +47,7 @@ class QualifyingPredictionResult:
             "round": self.round,
             "race_name": self.race_name,
             "circuit_id": self.circuit_id,
+            "n_drivers": int(len(self.predictions)),
             "pole": {
                 "driver_id": self.pole,
                 "driver_name": format_driver_id(self.pole),
