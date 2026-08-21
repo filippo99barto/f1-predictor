@@ -2,6 +2,15 @@
 
 LangChain + Gemini assistant that answers F1 prediction questions by calling the ML tools — it does not guess results.
 
+The underlying quali and race models were tuned for **top‑3 and top‑10 MAE** (podium- and top‑10-style picks). The agent surfaces their predictions; it does not re-rank or override them.
+
+## Table of contents
+
+- [Dev container](#dev-container)
+- [Layout](#layout)
+- [Notebook / CLI](#notebook--cli)
+- [Chat UI](#chat-ui)
+
 ## Dev container
 
 If you open the repo in the dev container, Python deps (`uv sync`), Node, and pnpm are already installed. Postgres and MLflow are running for the ML tools. On container start, `.devcontainer/post-start.sh` also launches the LangGraph server (`:2024`) and chat UI (`:3000`) for you — open `http://localhost:3000` once the container is up.

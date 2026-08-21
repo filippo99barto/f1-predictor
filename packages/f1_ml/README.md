@@ -2,6 +2,16 @@
 
 Qualifying and race XGBoost models, gold feature pipelines, and inference for the next Grand Prix.
 
+Feature sets and XGBoost hyperparameters were **optimized for top‑3 and top‑10 MAE** (`mae_top3`, `mae_top10`), aligned with podium and top‑10 prediction use cases. MLflow runs also report overall MAE, back‑marker slice (`mae_p11_plus`), and naive baselines.
+
+## Table of contents
+
+- [Dev container](#dev-container)
+- [Layout](#layout)
+- [Model tuning](#model-tuning)
+- [Usage](#usage)
+- [Depends on](#depends-on)
+
 ## Dev container
 
 If you open the repo in the dev container, Python deps, Postgres (`F1_DATABASE_URL`), MLflow, and MinIO are already running and configured. Port-forward MLflow at `http://localhost:5001` to inspect runs. You still need trained models in the registry (run `notebooks/train.ipynb`) before `predict_*` works.
@@ -18,6 +28,10 @@ f1_ml/
     evaluate_quali_race_cascade.py   Joint holdout eval (predicted grid → race)
   inference/next_race.py   Calendar, lineup, history + scaffold for target weekend
 ```
+
+## Model tuning
+
+Qualifying and race recipes (`models/qualifying/features.py`, `models/race/features.py`) and the shared XGB params in each `train.py` were chosen to minimize **top‑3 and top‑10 MAE** on holdout data, not overall MAE alone. After training, check slice metrics in MLflow (`mae_top3`, `mae_top10`, `mae_p11_plus`) alongside `mae` and `baseline_mae`.
 
 ## Usage
 

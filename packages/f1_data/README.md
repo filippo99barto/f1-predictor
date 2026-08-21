@@ -2,6 +2,13 @@
 
 Extracts Formula 1 data from the [Jolpi Ergast API](https://api.jolpi.ca/ergast/f1) and stores it in Postgres as bronze and silver tables.
 
+## Table of contents
+
+- [Dev container](#dev-container)
+- [Layout](#layout)
+- [Usage](#usage)
+- [Config](#config)
+
 ## Dev container
 
 If you open the repo in the dev container, setup is already done: `uv sync`, Postgres, and `F1_DATABASE_URL` are configured via `.devcontainer/docker-compose.yml`. You can run the pipelines below without installing deps or wiring the database yourself.
