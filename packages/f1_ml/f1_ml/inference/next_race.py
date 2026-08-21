@@ -3,8 +3,7 @@ from dataclasses import dataclass
 import pandas as pd
 
 from f1_data.storage.postgres_storage_backend import get_storage_backend
-from f1_data.storage.storage_backend import StorageBackend
-from f1_ml.models.common.splits import get_last_completed_race
+from f1_ml.models.common.splits import get_last_completed_season_round
 from f1_ml.models.race.train import load_training_data as load_race_gold
 
 MERGE_KEYS = ["season", "round", "driver_id", "constructor_id", "circuit_id"]
@@ -20,22 +19,14 @@ class RaceInfo:
     date: str | None = None
 
 
-def _storage() -> StorageBackend:
-    return get_storage_backend()
-
-
 def load_race_schedule(season: int | None = None) -> pd.DataFrame:
     """Load and normalize the race calendar from bronze."""
-    df = _storage().read("bronze", "races")
+    df = get_storage_backend().read("bronze", "races")
     df["season"] = df["season"].astype(int)
     df["round"] = df["round"].astype(int)
     if season is not None:
         df = df[df["season"] == season]
     return df.sort_values(["season", "round"]).reset_index(drop=True)
-
-
-def get_last_completed_race_from_gold() -> tuple[int, int]:
-    return get_last_completed_race(load_race_gold())
 
 
 def resolve_target_race(
@@ -57,7 +48,7 @@ def resolve_target_race(
             date=row.get("date"),
         )
 
-    last_season, last_round = get_last_completed_race_from_gold()
+    last_season, last_round = get_last_completed_season_round(load_race_gold())
     schedule = load_race_schedule()
     upcoming = schedule[
         (schedule["season"] > last_season)
@@ -86,7 +77,7 @@ def _filter_target_qualifying(quali_df: pd.DataFrame, season: int, round_num: in
 def load_target_qualifying(season: int, round_num: int) -> pd.DataFrame:
     """Silver qualifying rows for the target race, if they have been extracted."""
     return _filter_target_qualifying(
-        _storage().read("silver", "qualifying_results"), season, round_num
+        get_storage_backend().read("silver", "qualifying_results"), season, round_num
     )
 
 
@@ -104,7 +95,7 @@ def get_driver_lineup(
             target_quali[["driver_id", "constructor_id"]].drop_duplicates().reset_index(drop=True)
         )
 
-    race_df = _storage().read("silver", "race_results")
+    race_df = get_storage_backend().read("silver", "race_results")
     race_df["season"] = race_df["season"].astype(int)
     race_df["round"] = race_df["round"].astype(int)
 
@@ -161,7 +152,7 @@ def build_inference_frames(
     circuit_id: str,
 ) -> pd.DataFrame:
     """Load silver history, merge, and append scaffold rows for the target race."""
-    storage = _storage()
+    storage = get_storage_backend()
     race_df = storage.read("silver", "race_results")
     quali_df = storage.read("silver", "qualifying_results")
 

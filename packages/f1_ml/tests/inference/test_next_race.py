@@ -116,7 +116,7 @@ def _fake_inference_frames_with_actual_grid(
 
 
 @patch("f1_ml.inference.next_race.load_race_schedule")
-@patch("f1_ml.inference.next_race.get_last_completed_race_from_gold")
+@patch("f1_ml.inference.next_race.get_last_completed_season_round")
 def test_resolve_target_race_defaults_to_next_after_gold(
     mock_last_race,
     mock_schedule,
@@ -138,7 +138,7 @@ def test_resolve_target_race_explicit_round(mock_schedule):
     assert race == TARGET_RACE
 
 
-@patch("f1_ml.inference.next_race._storage")
+@patch("f1_ml.inference.next_race.get_storage_backend")
 def test_get_driver_lineup_returns_full_grid(mock_storage):
     mock_storage.return_value.read.return_value = FAKE_SILVER_RACE_RESULTS
 
@@ -168,7 +168,7 @@ def test_get_driver_lineup_prefers_qualifying():
     assert lineup["constructor_id"].tolist() == ["ferrari"]
 
 
-@patch("f1_ml.inference.next_race._storage")
+@patch("f1_ml.inference.next_race.get_storage_backend")
 def test_load_race_schedule_filters_season(mock_storage):
     mock_storage.return_value.read.return_value = FAKE_SCHEDULE
 

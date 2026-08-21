@@ -14,7 +14,7 @@ class SplitInfo:
     holdout_rounds: list[int]
 
 
-def get_last_completed_race(df: pd.DataFrame) -> tuple[int, int]:
+def get_last_completed_season_round(df: pd.DataFrame) -> tuple[int, int]:
     """Return max (season, round) from gold data."""
     idx = df[["season", "round"]].apply(tuple, axis=1).idxmax()
     row = df.loc[idx]
@@ -54,7 +54,7 @@ def split_latest_season_fraction(
 
 def split_last_race_holdout(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, SplitInfo]:
     """Hold out exactly the last (season, round) globally."""
-    holdout_season, holdout_round = get_last_completed_race(df)
+    holdout_season, holdout_round = get_last_completed_season_round(df)
 
     train_df = df[
         (df["season"] < holdout_season)
