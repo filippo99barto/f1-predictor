@@ -6,17 +6,17 @@ Race and driver data: [Jolpi Ergast API](https://api.jolpi.ca/ergast/f1) (2022�
 
 ## Table of contents
 
-- [Architecture](#architecture)
+- [Flowchart](#flowchart)
+- [Project structure](#project-structure)
+- [Screenshots](#screenshots)
 - [Getting started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Run the project](#run-the-project)
   - [Local URLs](#local-urls)
   - [Dev container stack](#dev-container-stack)
-- [Screenshots](#screenshots)
-- [Project structure](#project-structure)
-- [Documentation](#documentation)
+- [Extra Documentation](#extra-documentation)
 
-## Architecture
+## Flowchart
 
 ```mermaid
 flowchart LR
@@ -45,6 +45,48 @@ flowchart LR
 Both models are XGBoost regressors (`reg:absoluteerror`). **Features and hyperparameters were tuned with top‑3 and top‑10 MAE as the main targets** (`mae_top3`, `mae_top10` in MLflow), matching fantasy-league categories like podium and top‑10 picks — not overall grid MAE alone. Training also logs overall MAE, `mae_p11_plus`, and baseline comparisons.
 
 Training modes (`dev` / `production`).
+
+## Project structure
+
+```
+f1_predictor/
+├── .devcontainer/       Dev container + Compose (app, postgres, minio, mlflow)
+├── packages/
+│   ├── f1_data/         Bronze/silver pipelines, Postgres storage
+│   ├── f1_ml/           Gold pipelines, models, inference
+│   └── f1_agent/        LangChain agent, tools, chat UI (`ui/`)
+├── notebooks/           train.ipynb, assistant.ipynb
+├── docs/                extra docs & resources
+├── langgraph.json       LangGraph server entrypoint
+├── pyproject.toml       uv workspace root
+└── uv.lock
+```
+
+## Screenshots
+
+### Agent chat
+
+Podium prediction and a follow-up in the chat UI (`http://localhost:3000`):
+
+![Chat UI — podium prediction and follow-up](docs/resources/chat-ui-podium-and-followup.png)
+
+Next race schedule from the agent (`get_next_race_info`):
+
+![Chat UI — next race metadata](docs/resources/chat-ui-next-race-metadata.png)
+
+### MLflow metrics
+
+Holdout metrics for the qualifying model (`http://localhost:5001`):
+
+![MLflow — qualifying results metrics](docs/resources/mlflow-qualifying-results-metrics.png)
+
+Holdout metrics for the race model:
+
+![MLflow — race results metrics](docs/resources/mlflow-race-results-metrics.png)
+
+End-to-end cascade eval (predicted grid → race):
+
+![MLflow — quali/race cascade metrics](docs/resources/mlflow-quali-race-cascade-metrics.png)
 
 ## Getting started
 
@@ -83,49 +125,7 @@ Bronze/silver/gold tables, MLflow, and Postgres are provided by the dev containe
 
 Defined in `.devcontainer/docker-compose.yml`. Postgres schemas and tables are initialized on a fresh volume via `.devcontainer/init-postgres.sh`.
 
-## Screenshots
-
-### Agent chat
-
-Podium prediction and a follow-up in the chat UI (`http://localhost:3000`):
-
-![Chat UI — podium prediction and follow-up](docs/resources/chat-ui-podium-and-followup.png)
-
-Next race schedule from the agent (`get_next_race_info`):
-
-![Chat UI — next race metadata](docs/resources/chat-ui-next-race-metadata.png)
-
-### MLflow metrics
-
-Holdout metrics for the qualifying model (`http://localhost:5001`):
-
-![MLflow — qualifying results metrics](docs/resources/mlflow-qualifying-results-metrics.png)
-
-Holdout metrics for the race model:
-
-![MLflow — race results metrics](docs/resources/mlflow-race-results-metrics.png)
-
-End-to-end cascade eval (predicted grid → race):
-
-![MLflow — quali/race cascade metrics](docs/resources/mlflow-quali-race-cascade-metrics.png)
-
-## Project structure
-
-```
-f1_predictor/
-├── .devcontainer/       Dev container + Compose (app, postgres, minio, mlflow)
-├── packages/
-│   ├── f1_data/         Bronze/silver pipelines, Postgres storage
-│   ├── f1_ml/           Gold pipelines, models, inference
-│   └── f1_agent/        LangChain agent, tools, chat UI (`ui/`)
-├── notebooks/           train.ipynb, assistant.ipynb
-├── docs/                extra docs & resources
-├── langgraph.json       LangGraph server entrypoint
-├── pyproject.toml       uv workspace root
-└── uv.lock
-```
-
-## Documentation
+## Extra Documentation
 
 | Doc | Contents |
 |-----|----------|
