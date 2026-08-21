@@ -1,6 +1,22 @@
 # F1 Agent
 
-LangChain + Gemini assistant that calls the F1 ML tools. The compiled graph is built once per process (`get_agent()`). `ask()` is a notebook/CLI helper; the chat UI talks to a LangGraph server.
+LangChain + Gemini assistant that answers F1 prediction questions by calling the ML tools — it does not guess results.
+
+## Dev container
+
+If you open the repo in the dev container, Python deps (`uv sync`), Node, and pnpm are already installed. Postgres and MLflow are running for the ML tools. On container start, `.devcontainer/post-start.sh` also launches the LangGraph server (`:2024`) and chat UI (`:3000`) for you — open `http://localhost:3000` once the container is up.
+
+Add your `GEMINI_API_KEY` to repo-root `.env` (copy from `.env.example`) — that is the only secret you need to set yourself.
+
+## Layout
+
+```
+f1_agent/
+  agent.py      System prompt and compiled LangGraph agent
+  tools.py      get_next_race_info, predict_next_qualifying, predict_next_race
+  client.py     ask() helper for notebooks / CLI (in-memory thread memory)
+  ui/           Next.js chat UI (fork of [agent-chat-ui](https://github.com/langchain-ai/agent-chat-ui))
+```
 
 ## Notebook / CLI
 
@@ -11,19 +27,21 @@ answer = ask("Who will win the next race?")
 why = ask("Why that driver?")  # same conversation; sees prior tool results
 ```
 
-Follow-ups reuse an in-memory thread (`thread_id="default"`). Pass a new `thread_id` to start a fresh conversation.
+Follow-ups reuse an in-memory thread (`thread_id="default"`). Pass a new `thread_id` to start fresh.
 
-Requires `GEMINI_API_KEY` in the environment or repo-root `.env` (copy from `.env.example`).
+Requires `GEMINI_API_KEY` in repo-root `.env` (see `.env.example`). In the dev container everything else is already configured.
 
 ## Chat UI
 
-Start the persistent agent (from the repo root):
+**Dev container:** LangGraph and the UI start automatically. Open `http://localhost:3000` (server at `:2024`, graph id `agent`). Logs: `/tmp/langgraph.log`, `/tmp/f1-agent-ui.log`.
+
+**Manual setup** — from the repo root:
 
 ```bash
 uv run langgraph dev
 ```
 
-Then in another terminal:
+Then:
 
 ```bash
 cd packages/f1_agent/ui
@@ -31,4 +49,4 @@ pnpm install
 pnpm dev
 ```
 
-The UI is at `http://localhost:3000` and connects to the server at `http://localhost:2024` (graph id `agent`). Threads are stored by the server, so follow-up questions keep context.
+See `packages/f1_agent/ui/README.md` for UI-only details.
