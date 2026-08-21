@@ -19,7 +19,7 @@ Race and driver data: [Jolpi Ergast API](https://api.jolpi.ca/ergast/f1) (2022�
 ## Architecture
 
 ```mermaid
-flowchart TB
+flowchart LR
     API[Jolpi Ergast API] --> Bronze
     Bronze --> Silver
     Silver --> Gold
@@ -119,7 +119,7 @@ f1_predictor/
 │   ├── f1_ml/           Gold pipelines, models, inference
 │   └── f1_agent/        LangChain agent, tools, chat UI (`ui/`)
 ├── notebooks/           train.ipynb, assistant.ipynb
-├── docs/                usefull-commands.md, resources/ (screenshots)
+├── docs/                extra docs & resources
 ├── langgraph.json       LangGraph server entrypoint
 ├── pyproject.toml       uv workspace root
 └── uv.lock
@@ -130,6 +130,7 @@ f1_predictor/
 | Doc | Contents |
 |-----|----------|
 | [Useful commands](docs/usefull-commands.md) | Train, predict, assistant, tests, lint, env vars |
+| [Limitations and next work](docs/limitations-and-next-work.md) | Known gaps (data, models, inference) and planned improvements |
 | [f1_data](packages/f1_data/README.md) | Bronze/silver pipelines |
 | [f1_ml](packages/f1_ml/README.md) | Gold, training, inference |
 | [f1_agent](packages/f1_agent/README.md) | Agent tools and chat UI |
