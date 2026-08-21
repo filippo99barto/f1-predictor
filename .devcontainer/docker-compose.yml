@@ -4,6 +4,9 @@ services:
     volumes:
       - ..:/workspaces/f1_predictor:cached
     command: sleep infinity
+    ports:
+      - "2024:2024" # LangGraph
+      - "3000:3000" # Chat UI
     depends_on:
       mlflow:
         condition: service_started
