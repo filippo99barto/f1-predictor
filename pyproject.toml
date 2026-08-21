@@ -14,6 +14,7 @@ dev = [
     "pre-commit",
     "jupyter",
     "ipykernel",
+    "vulture>=2.14",
 ]
 
 [tool.uv]
@@ -51,6 +52,18 @@ known-first-party = ["f1_data", "f1_ml", "f1_agent"]
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.vulture]
+min_confidence = 80
+paths = [
+    "packages/f1_data/f1_data",
+    "packages/f1_ml/f1_ml",
+    "packages/f1_agent/f1_agent",
+]
+exclude = ["*/schemas.py"]
+ignore_names = [
+    "agent",  # LangGraph entrypoint via langgraph.json string ref
+]
 
 [tool.coverage.run]
 source = ["f1_data", "f1_ml", "f1_agent"]
