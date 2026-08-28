@@ -1,4 +1,8 @@
+from pathlib import Path
+
 DATA_START_BACKFILL = 2022  # default start year when bronze extract(backfill=True)
+
+LOCAL_DATA_DIR = Path(__file__).resolve().parents[4] / "datasets"
 
 JOLPI_API_URL = "https://api.jolpi.ca/ergast/f1"
 JOLPI_API_LIMIT = 100
