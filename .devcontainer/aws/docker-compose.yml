@@ -1,0 +1,38 @@
+name: f1-predictor-aws
+
+services:
+  minio:
+    profiles: ["never"]
+  minio-init:
+    profiles: ["never"]
+
+  app:
+    depends_on: !override
+      mlflow:
+        condition: service_started
+    volumes:
+      - ${HOME}/.aws:/home/vscode/.aws:ro
+    environment: !override
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      F1_DATABASE_URL: postgresql://f1_predictor:f1_predictor@postgres:5432/f1_predictor
+
+  mlflow:
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+    env_file:
+      - aws/.env
+    environment: !override
+      MLFLOW_BACKEND_STORE_URI: postgresql://mlflow:mlflow@postgres:5432/mlflow
+    command:
+      - mlflow
+      - server
+      - --host=0.0.0.0
+      - --port=5000
+      - --backend-store-uri=postgresql://mlflow:mlflow@postgres:5432/mlflow
+      - --serve-artifacts
+      - --artifacts-destination=s3://f1-predictor-artifacts-20260828122024827800000001/artifacts
+      - --default-artifact-root=mlflow-artifacts:/
+      - --allowed-hosts=localhost:*,127.0.0.1:*,mlflow:*
+      - --cors-allowed-origins=*
+      - --disable-security-middleware
