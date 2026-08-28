@@ -18,4 +18,11 @@ provider "aws" {
   # paste the Account ID from running:
   # $ aws sts get-caller-identity --profile f1-predictor
   allowed_account_ids = [var.aws_account_id]
+
+  default_tags {
+    tags = {
+      Project     = "f1-predictor"
+      ManagedBy   = "terraform"
+    }
+  }
 }
