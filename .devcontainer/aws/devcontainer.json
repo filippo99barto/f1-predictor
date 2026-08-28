@@ -6,7 +6,7 @@
     ],
     "service": "app",
     "workspaceFolder": "/workspaces/f1_predictor",
-    "runServices": ["app", "postgres", "mlflow"],
+    "runServices": ["app", "mlflow"],
     "remoteEnv": {
       "PATH": "${containerEnv:HOME}/.local/bin:${containerEnv:PATH}"
     },

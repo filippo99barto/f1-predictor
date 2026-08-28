@@ -6,8 +6,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
+    postgresql = {
+      source  = "cyrilgdn/postgresql"
+      version = "~> 1.22"
+    }
   }
-  # No backend block = local state (terraform.tfstate in this folder, gitignored)
 }
 
 provider "aws" {
@@ -25,4 +32,14 @@ provider "aws" {
       ManagedBy   = "terraform"
     }
   }
+}
+
+provider "postgresql" {
+  host             = aws_db_instance.postgres.address
+  port             = aws_db_instance.postgres.port
+  username         = aws_db_instance.postgres.username
+  password         = random_password.rds_master.result
+  sslmode          = "require"
+  superuser        = false
+  connect_timeout  = 15
 }

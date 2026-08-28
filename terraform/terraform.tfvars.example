@@ -1,3 +1,6 @@
 # paste the Account ID from running:
 #  $ aws sts get-caller-identity --profile f1-predictor
 aws_account_id = "<your-account-id-here>"
+
+# current public IP -> curl -s https://checkip.amazonaws.com
+my_ip = <your-ip>
