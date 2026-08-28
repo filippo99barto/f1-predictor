@@ -1,0 +1,3 @@
+# paste the Account ID from running:
+#  $ aws sts get-caller-identity --profile f1-predictor
+aws_account_id = "<your-account-id-here>"

@@ -12,3 +12,9 @@ plans/
 htmlcov/
 .langgraph_api/
 .pnpm-store/
+
+# Terraform
+*tfvars
+**/.terraform/*
+*.tfstate
+*.tfstate.*
