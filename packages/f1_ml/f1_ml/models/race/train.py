@@ -7,7 +7,7 @@ from f1_ml.models.common.trainer import load_training_data as _load_training_dat
 from f1_ml.models.common.trainer import train_model as _train_model
 
 EXPERIMENT_NAME = "f1-race-results-predictor"
-MODEL_NAME = "f1_position_predictor"
+MODEL_NAME = "f1-position-predictor"
 
 FEATURE_COLS = [
     "qualifying_position",

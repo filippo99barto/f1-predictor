@@ -3,26 +3,10 @@ resource "random_password" "f1_predictor_role" {
   special = false
 }
 
-resource "random_password" "mlflow_role" {
-  length  = 20
-  special = false
-}
-
 resource "postgresql_role" "f1_predictor" {
   name     = "f1_predictor"
   login    = true
   password = random_password.f1_predictor_role.result
-}
-
-resource "postgresql_role" "mlflow" {
-  name     = "mlflow"
-  login    = true
-  password = random_password.mlflow_role.result
-}
-
-resource "postgresql_database" "mlflow" {
-  name  = "mlflow"
-  owner = postgresql_role.mlflow.name
 }
 
 resource "postgresql_database" "f1_predictor" {
@@ -32,10 +16,5 @@ resource "postgresql_database" "f1_predictor" {
 
 output "f1_predictor_role_password" {
   value     = random_password.f1_predictor_role.result
-  sensitive = true
-}
-
-output "mlflow_role_password" {
-  value     = random_password.mlflow_role.result
   sensitive = true
 }

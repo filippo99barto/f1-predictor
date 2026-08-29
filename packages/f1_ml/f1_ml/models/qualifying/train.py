@@ -7,7 +7,7 @@ from f1_ml.models.common.trainer import load_training_data as _load_training_dat
 from f1_ml.models.common.trainer import train_model as _train_model
 
 EXPERIMENT_NAME = "f1-qualifying-results-predictor"
-MODEL_NAME = "f1_qualifying_predictor"
+MODEL_NAME = "f1-qualifying-predictor"
 
 FEATURE_COLS = [
     "driver_positions_gained_season_median",

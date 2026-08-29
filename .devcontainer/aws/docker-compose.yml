@@ -7,33 +7,14 @@ services:
     profiles: ["never"]
   postgres:
     profiles: ["never"]
+  mlflow:
+    profiles: ["never"]
 
   app:
-    depends_on: !override
-      mlflow:
-        condition: service_started
+    depends_on: !reset
     volumes:
       - ${HOME}/.aws:/home/vscode/.aws:ro
     environment: !override
-      MLFLOW_TRACKING_URI: http://mlflow:5000
+      AWS_PROFILE: f1-predictor
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
       F1_DATABASE_URL: postgresql://f1_predictor:${F1_PREDICTOR_DB_PASSWORD}@${RDS_HOST}:5432/f1_predictor
-
-  mlflow:
-    depends_on: !reset
-    environment: !override
-      MLFLOW_BACKEND_STORE_URI: postgresql://mlflow:${MLFLOW_DB_PASSWORD}@${RDS_HOST}:5432/mlflow
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-    command:
-      - mlflow
-      - server
-      - --host=0.0.0.0
-      - --port=5000
-      - --backend-store-uri=postgresql://mlflow:${MLFLOW_DB_PASSWORD}@${RDS_HOST}:5432/mlflow
-      - --serve-artifacts
-      - --artifacts-destination=s3://f1-predictor-artifacts-20260828122024827800000001/artifacts
-      - --default-artifact-root=mlflow-artifacts:/
-      - --allowed-hosts=localhost:*,127.0.0.1:*,mlflow:*
-      - --cors-allowed-origins=*
-      - --disable-security-middleware
