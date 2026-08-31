@@ -10,10 +10,6 @@ Race and driver data: [Jolpi Ergast API](https://api.jolpi.ca/ergast/f1) (2022�
 - [Project structure](#project-structure)
 - [Screenshots](#screenshots)
 - [Getting started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Run the project](#run-the-project)
-  - [Local URLs](#local-urls)
-  - [Dev container stack](#dev-container-stack)
 - [Extra Documentation](#extra-documentation)
 
 ## Flowchart
@@ -50,13 +46,14 @@ Training modes (`dev` / `production`).
 
 ```
 f1_predictor/
-├── .devcontainer/       Dev container + Compose (app, postgres, minio, mlflow)
+├── .devcontainer/       Dev Containers (local Compose stack + aws/ overlay)
 ├── packages/
 │   ├── f1_data/         Bronze/silver pipelines, Postgres storage
 │   ├── f1_ml/           Gold pipelines, models, inference
 │   └── f1_agent/        LangChain agent, tools, chat UI (`ui/`)
 ├── notebooks/           train.ipynb, assistant.ipynb
-├── docs/                extra docs & resources
+├── docs/                setup walkthroughs, extra docs & resources
+├── terraform/           optional AWS backend (S3, RDS, SageMaker MLflow)
 ├── langgraph.json       LangGraph server entrypoint
 ├── pyproject.toml       uv workspace root
 └── uv.lock
@@ -90,45 +87,44 @@ End-to-end cascade eval (predicted grid → race):
 
 ## Getting started
 
-### Prerequisites
+Choose a backend, then follow the matching walkthrough.
 
-- **Docker** with Compose — [Docker Desktop](https://www.docker.com/products/docker-desktop/), [OrbStack](https://orbstack.dev/) (macOS), or any Engine with Compose v2
-- **Editor with Dev Containers** — [VS Code](https://code.visualstudio.com/) or [Cursor](https://cursor.com/) ([Dev Containers](https://containers.dev/) extension; also [GitHub Codespaces](https://github.com/codespaces))
+| | Local | AWS |
+|---|--------|-----|
+| **Stack** | Compose Postgres, MinIO, MLflow | RDS Postgres, SageMaker MLflow, S3 |
+| **Dev Container** | **F1 Predictor** | **F1 Predictor (AWS)** |
+| **Guide** | [Local setup](docs/local-setup.md) | [AWS setup](docs/aws-setup.md) |
 
-### Run the project
+```mermaid
+flowchart LR
+  subgraph local [Local Dev Container]
+    AppLocal[app]
+    PG[postgres]
+    Minio[minio]
+    MLflowLocal[mlflow]
+    AppLocal --> PG
+    AppLocal --> MLflowLocal
+    MLflowLocal --> Minio
+  end
+  subgraph aws [AWS Dev Container]
+    AppAWS[app]
+    RDS[RDS Postgres]
+    Sage[SageMaker MLflow]
+    S3[S3 artifacts]
+    AppAWS --> RDS
+    AppAWS --> Sage
+    Sage --> S3
+  end
+```
 
-1. Clone the repo and open it in a dev container (*Dev Containers: Reopen in Container*).
-2. Wait for `post-create` (deps + pre-commit) and `post-start` (LangGraph + chat UI).
-3. Copy `.env.example` → `.env` and set `GEMINI_API_KEY` for the assistant and chat UI.
-4. **Load data and train models** — run `notebooks/train.ipynb` end to end (bronze → silver → gold → train → eval). The dev container does not populate Postgres or register models on its own. On first setup, use bronze backfill if you need history beyond the current season ([Train end-to-end](docs/usefull-commands.md#train-end-to-end)).
-
-Bronze/silver/gold tables, MLflow, and Postgres are provided by the dev container stack — you still run the pipelines and training yourself via the notebook.
-
-### Local URLs
-
-| URL | Service |
-|-----|---------|
-| [localhost:5001](http://localhost:5001) | MLflow UI |
-| [localhost:9001](http://localhost:9001) | MinIO console (`minioadmin` / `minioadmin`) |
-| [localhost:3000](http://localhost:3000) | Agent chat UI |
-| [localhost:2024](http://localhost:2024) | LangGraph API (graph id `agent`) |
-
-### Dev container stack
-
-| Service | Role |
-|---------|------|
-| **app** | Python 3.12 workspace (`uv`, notebooks, tests) |
-| **postgres** | `f1_predictor` DB (bronze/silver/gold) + `mlflow` DB |
-| **minio** | MLflow artifact store (S3-compatible) |
-| **mlflow** | Experiment tracking and model registry |
-| **LangGraph + UI** | Started in `app` on container boot |
-
-Defined in `.devcontainer/docker-compose.yml`. Postgres schemas and tables are initialized on a fresh volume via `.devcontainer/init-postgres.sh`.
+Chat UI and LangGraph run in `app` in both modes ([localhost:3000](http://localhost:3000) / [localhost:2024](http://localhost:2024)). MLflow `:5001` and MinIO `:9001` are local-only.
 
 ## Extra Documentation
 
 | Doc | Contents |
 |-----|----------|
+| [Local setup](docs/local-setup.md) | Docker Dev Container: Postgres, MinIO, MLflow |
+| [AWS setup](docs/aws-setup.md) | Terraform + AWS Dev Container: RDS, SageMaker MLflow, S3 |
 | [Useful commands](docs/usefull-commands.md) | Train, predict, assistant, tests, lint, env vars |
 | [Limitations and next work](docs/limitations-and-next-work.md) | Known gaps (data, models, inference) and planned improvements |
 | [f1_data](packages/f1_data/README.md) | Bronze/silver pipelines |

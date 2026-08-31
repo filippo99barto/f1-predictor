@@ -1,8 +1,13 @@
 # Useful commands
 
-Commands to run **inside the dev container** terminal (`/workspaces/f1_predictor`). The dev container is the supported way to run this project: it provides Python, Postgres, MinIO, MLflow, and (on start) the LangGraph server and chat UI.
+Commands to run **inside the Dev Container** terminal (`/workspaces/f1_predictor`). The Dev Container is the supported way to run this project: it provides Python and (on start) the LangGraph server and chat UI.
 
-See the [README](../README.md) for requirements and how the Docker services fit together.
+Backend depends on which config you opened:
+
+- [Local setup](local-setup.md) — Compose Postgres, MinIO, and MLflow
+- [AWS setup](aws-setup.md) — RDS, SageMaker MLflow, and S3 (no local Postgres/MinIO/MLflow)
+
+See the [README](../README.md) for the local vs AWS chooser.
 
 ## Table of contents
 
@@ -105,9 +110,9 @@ Config: `pyproject.toml` (`[tool.ruff]`, `[tool.vulture]`, `[tool.coverage.*]`).
 
 ## Environment (set in dev container)
 
-These are configured in `.devcontainer/docker-compose.yml` for the `app` service. Override via `.env` only when you need to (e.g. `GEMINI_API_KEY`).
+**Local** defaults are configured in `.devcontainer/docker-compose.yml` for the `app` service. Override via repo-root `.env` only when you need to (e.g. `GEMINI_API_KEY`). **AWS** uses `.devcontainer/.env` for `MLFLOW_TRACKING_URI`, `RDS_HOST`, and `F1_PREDICTOR_DB_PASSWORD` — see [AWS setup](aws-setup.md).
 
-| Variable | Default in dev container |
+| Variable | Default (local stack) |
 |----------|--------------------------|
 | `GEMINI_API_KEY` | Set in `.env` (required for assistant / chat UI) |
 | `MLFLOW_TRACKING_URI` | `http://mlflow:5000` (UI on host: `http://localhost:5001`) |
@@ -122,4 +127,6 @@ Backfill start year: `packages/f1_data/f1_data/config/constants.py` (`DATA_START
 
 ## Postgres
 
-Postgres hosts two databases on one instance: `mlflow` (tracking) and `f1_predictor` (bronze/silver/gold tables). Users, databases, and F1 DDL are created by `.devcontainer/init-postgres.sh` on a **fresh** volume only. After pulling a layout change, recreate the `postgres-data` Docker volume (or run that script by hand against an existing instance) so init runs again.
+**Local stack only.** Postgres hosts two databases on one instance: `mlflow` (tracking) and `f1_predictor` (bronze/silver/gold tables). Users, databases, and F1 DDL are created by `.devcontainer/init-postgres.sh` on a **fresh** volume only. After pulling a layout change, recreate the `postgres-data` Docker volume (or run that script by hand against an existing instance) so init runs again.
+
+On AWS, `f1_predictor` lives on RDS (see [AWS setup](aws-setup.md)); there is no local `postgres` service.
