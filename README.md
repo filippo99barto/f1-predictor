@@ -51,7 +51,7 @@ f1_predictor/
 │   ├── f1_data/         Bronze/silver pipelines, Postgres storage
 │   ├── f1_ml/           Gold pipelines, models, inference
 │   └── f1_agent/        LangChain agent, tools, chat UI (`ui/`)
-├── notebooks/           train.ipynb, assistant.ipynb
+├── notebooks/           train.ipynb, assistant.ipynb, eval.ipynb
 ├── docs/                setup walkthroughs, extra docs & resources
 ├── terraform/           optional AWS backend (S3, RDS, SageMaker MLflow)
 ├── langgraph.json       LangGraph server entrypoint
@@ -84,6 +84,10 @@ Holdout metrics for the race model:
 End-to-end cascade eval (predicted grid → race):
 
 ![MLflow — quali/race cascade metrics](docs/resources/mlflow-quali-race-cascade-metrics.png)
+
+Agent Traces Evaluation:
+
+![MLflow - Traces Evaluation](docs/resources/mlflow-agent-eval-traces.png)
 
 ## Getting started
 
