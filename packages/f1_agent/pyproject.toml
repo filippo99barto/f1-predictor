@@ -10,6 +10,7 @@ dependencies = [
     "f1-ml",
     "langchain",
     "langchain-google-genai",
+    "langchain-openai",
     "langgraph-cli[inmem]",
     "python-dotenv",
 ]
