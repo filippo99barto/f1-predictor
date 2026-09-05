@@ -8,42 +8,84 @@ from mlflow.genai.scorers import ToolCallCorrectness, ToolCallEfficiency
 
 from f1_agent.agent import _enable_agent_tracking, build_agent
 
-EVAL_CASES = [
-    {
-        "inputs": {"question": "Who will win the next race?"},
-        "expectations": {"route": "predictor", "tool": "predict_next_race"},
-        "tags": {"intent": "win"},
-    },
-    {
-        "inputs": {"question": "Who is on pole?"},
-        "expectations": {"route": "predictor", "tool": "predict_next_qualifying"},
-        "tags": {"intent": "pole"},
-    },
-    {
-        "inputs": {"question": "When and where is the next race?"},
-        "expectations": {"route": "info", "tool": "get_next_race_info"},
-        "tags": {"intent": "schedule"},
-    },
-    {
-        "inputs": {
-            "question": "Why?",
-            "prior": "Who will win the next race?",
-        },
-        "expectations": {
-            "route": "predictor",
-            "tool": "predict_next_race",
-            "followup": True,
-        },
-        "tags": {"intent": "why"},
-    },
+DATASET_NAME = "f1-agent-behavior"
+
+POLE_PHRASES = [
+    "Who is on pole?",
+    "Who's on pole?",
+    "Who do you think will win qualifying?",
+    "Who's on the pole position?",
+    "What will the result of qualifying be?",
+]
+
+SCHEDULE_PHRASES = [
+    "When and where is the next race?",
+    "When and where is the next Grand Prix?",
+    "Which circuit will the next race be on?",
+    "What is the next race?",
+]
+
+WIN_WHY_PAIRS = [
+    ("Who will win the next race?", "Why?"),
+    ("Who wins the next Grand Prix?", "Why is this the case?"),
+    ("Predict the winner of the upcoming race", "What are you basing your prediction on?"),
+    ("Who do you think takes the next race?", "Why do you think this will happen?"),
+    ("What's your pick for the next race winner?", "Is there a reason for this?"),
 ]
 
 
+def _win_why_cases() -> list[dict]:
+    cases = []
+    for first, followup in WIN_WHY_PAIRS:
+        cases.append(
+            {
+                "inputs": {"question": first},
+                "expectations": {"route": "predictor", "tool": "predict_next_race"},
+                "tags": {"intent": "win", "pair": first},
+            }
+        )
+        cases.append(
+            {
+                "inputs": {"question": followup, "prior": first},
+                "expectations": {
+                    "route": "predictor",
+                    "tool": "predict_next_race",
+                    "followup": True,
+                },
+                "tags": {"intent": "why", "pair": first},
+            }
+        )
+    return cases
+
+
+EVAL_CASES = (
+    _win_why_cases()
+    + [
+        {
+            "inputs": {"question": pole_phrase},
+            "expectations": {"route": "predictor", "tool": "predict_next_qualifying"},
+            "tags": {"intent": "pole"},
+        }
+        for pole_phrase in POLE_PHRASES
+    ]
+    + [
+        {
+            "inputs": {"question": schedule_phrase},
+            "expectations": {"route": "info", "tool": "get_next_race_info"},
+            "tags": {"intent": "schedule"},
+        }
+        for schedule_phrase in SCHEDULE_PHRASES
+    ]
+)
+
+
 def _ensure_dataset():
-    try:
-        ds = mlflow.genai.create_dataset(name="f1-agent-behavior")
-    except Exception:
-        ds = mlflow.genai.get_dataset(name="f1-agent-behavior")
+    existing = mlflow.genai.search_datasets(
+        filter_string=f"name = '{DATASET_NAME}'",
+        order_by=["created_time DESC"],
+        max_results=1,
+    )
+    ds = existing[0] if existing else mlflow.genai.create_dataset(name=DATASET_NAME)
     ds.merge_records(EVAL_CASES)
     return ds
 
