@@ -1,11 +1,13 @@
+import logging
 from typing import Any
 
 from langchain.tools import tool
-from mlflow.exceptions import MlflowException
 
 from f1_ml.inference.next_race import resolve_target_race
 from f1_ml.models.qualifying.predict import predict_next_qualifying as run_predict_next_qualifying
 from f1_ml.models.race.predict import predict_next_race as run_predict_next_race
+
+logger = logging.getLogger(__name__)
 
 
 @tool
@@ -23,7 +25,8 @@ def get_next_race_info(
     """
     try:
         race = resolve_target_race(season=season, round_num=round)
-    except ValueError as exc:
+    except Exception as exc:
+        logger.warning("get_next_race_info failed: %s", exc)
         return {"error": str(exc)}
 
     date = race.date
@@ -61,7 +64,8 @@ def predict_next_qualifying(
     """
     try:
         result = run_predict_next_qualifying(season=season, round_num=round)
-    except (ValueError, FileNotFoundError, MlflowException) as exc:
+    except Exception as exc:
+        logger.warning("predict_next_qualifying failed: %s", exc)
         return {"error": str(exc)}
 
     return result.to_dict(top_n=top_n)
@@ -91,7 +95,8 @@ def predict_next_race(
     """
     try:
         result = run_predict_next_race(season=season, round_num=round)
-    except (ValueError, FileNotFoundError, MlflowException) as exc:
+    except Exception as exc:
+        logger.warning("predict_next_race failed: %s", exc)
         return {"error": str(exc)}
 
     return result.to_dict(top_n=top_n)
