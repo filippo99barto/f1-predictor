@@ -11,20 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 @tool
-def get_next_race_info(
-    season: int | None = None,
-    round: int | None = None,
-) -> dict[str, Any]:
+def get_next_race_info() -> dict[str, Any]:
     """Get schedule metadata for the next upcoming F1 race.
 
     Does not run predictions.
-
-    Args:
-        season: Season year (optional).
-        round: Round number (optional).
     """
     try:
-        race = resolve_target_race(season=season, round_num=round)
+        race = resolve_target_race()
     except Exception as exc:
         logger.warning("get_next_race_info failed: %s", exc)
         return {"error": str(exc)}
@@ -43,11 +36,7 @@ def get_next_race_info(
 
 
 @tool
-def predict_next_qualifying(
-    season: int | None = None,
-    round: int | None = None,
-    top_n: int | None = None,
-) -> dict[str, Any]:
+def predict_next_qualifying(top_n: int | None = None) -> dict[str, Any]:
     """Predict qualifying / grid positions for the next upcoming F1 race.
 
     Use for pole, grid, or qualifying questions. Does not predict the race.
@@ -57,13 +46,11 @@ def predict_next_qualifying(
     when asked why a driver is predicted where they are.
 
     Args:
-        season: Season year (optional; defaults to next race after latest results).
-        round: Round number (optional; requires season if set).
         top_n: Number of top qualifiers to include. Omit for the full field
             (see n_drivers in the result).
     """
     try:
-        result = run_predict_next_qualifying(season=season, round_num=round)
+        result = run_predict_next_qualifying()
     except Exception as exc:
         logger.warning("predict_next_qualifying failed: %s", exc)
         return {"error": str(exc)}
@@ -72,11 +59,7 @@ def predict_next_qualifying(
 
 
 @tool
-def predict_next_race(
-    season: int | None = None,
-    round: int | None = None,
-    top_n: int | None = None,
-) -> dict[str, Any]:
+def predict_next_race(top_n: int | None = None) -> dict[str, Any]:
     """Predict race finishing positions for the next upcoming F1 race.
 
     Use for win, podium, or race-result questions. Uses Saturday's grid when
@@ -88,13 +71,11 @@ def predict_next_race(
     why a driver is predicted where they are.
 
     Args:
-        season: Season year (optional; defaults to next race after latest results).
-        round: Round number (optional; requires season if set).
         top_n: Number of top finishers to include. Omit for the full field
             (see n_drivers in the result).
     """
     try:
-        result = run_predict_next_race(season=season, round_num=round)
+        result = run_predict_next_race()
     except Exception as exc:
         logger.warning("predict_next_race failed: %s", exc)
         return {"error": str(exc)}

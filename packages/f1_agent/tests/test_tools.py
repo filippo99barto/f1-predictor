@@ -24,7 +24,7 @@ def test_get_next_race_info_returns_schedule():
 
 def test_get_next_race_info_returns_error_on_failure():
     with patch("f1_agent.tools.resolve_target_race", side_effect=ValueError("no race")):
-        assert get_next_race_info.invoke({"season": 2099}) == {"error": "no race"}
+        assert get_next_race_info.invoke({}) == {"error": "no race"}
 
 
 def test_predict_next_qualifying_returns_grid():

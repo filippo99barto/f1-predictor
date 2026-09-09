@@ -1,8 +1,6 @@
 import os
-import uuid
 
 import mlflow
-from langgraph.checkpoint.memory import InMemorySaver
 from mlflow.genai import scorer
 from mlflow.genai.scorers import ToolCallCorrectness, ToolCallEfficiency
 
@@ -10,73 +8,132 @@ from f1_agent.agent import _enable_agent_tracking, build_agent
 
 DATASET_NAME = "f1-agent-behavior"
 
-POLE_PHRASES = [
-    "Who is on pole?",
-    "Who's on pole?",
-    "Who do you think will win qualifying?",
-    "Who's on the pole position?",
-    "What will the result of qualifying be?",
+# One raw case per question, single-worker or compound alike — "compound" is
+# just whichever cases name more than one tool, not a separate category.
+# A case can optionally carry:
+#   - "followup": a second question asked right after, in the same thread,
+#     that should still be answered from context (e.g. "Why?").
+#   - "needs_reasoning": the answer must show its work (features/why), not
+#     just a bare name — implied automatically for a "followup".
+CASES_RAW = [
+    # -- schedule only (info worker) --
+    {
+        "question": "When and where is the next race?",
+        "tools": ["get_next_race_info"],
+        "intent": "schedule",
+    },
+    {
+        "question": "When and where is the next Grand Prix?",
+        "tools": ["get_next_race_info"],
+        "intent": "schedule",
+    },
+    {
+        "question": "Which circuit will the next race be on?",
+        "tools": ["get_next_race_info"],
+        "intent": "schedule",
+    },
+    {"question": "What is the next race?", "tools": ["get_next_race_info"], "intent": "schedule"},
+    # -- qualifying only (predictor worker) --
+    {"question": "Who is on pole?", "tools": ["predict_next_qualifying"], "intent": "pole"},
+    {"question": "Who's on pole?", "tools": ["predict_next_qualifying"], "intent": "pole"},
+    {
+        "question": "Who do you think will win qualifying?",
+        "tools": ["predict_next_qualifying"],
+        "intent": "pole",
+    },
+    {
+        "question": "Who's on the pole position?",
+        "tools": ["predict_next_qualifying"],
+        "intent": "pole",
+    },
+    {
+        "question": "What will the result of qualifying be?",
+        "tools": ["predict_next_qualifying"],
+        "intent": "pole",
+    },
+    # -- race winner only (predictor worker), each with a same-thread "why" follow-up --
+    {
+        "question": "Who will win the next race?",
+        "tools": ["predict_next_race"],
+        "intent": "win",
+        "followup": "Why?",
+    },
+    {
+        "question": "Who wins the next Grand Prix?",
+        "tools": ["predict_next_race"],
+        "intent": "win",
+        "followup": "Why is this the case?",
+    },
+    {
+        "question": "Predict the winner of the upcoming race",
+        "tools": ["predict_next_race"],
+        "intent": "win",
+        "followup": "What are you basing your prediction on?",
+    },
+    {
+        "question": "Who do you think takes the next race?",
+        "tools": ["predict_next_race"],
+        "intent": "win",
+        "followup": "Why do you think this will happen?",
+    },
+    {
+        "question": "What's your pick for the next race winner?",
+        "tools": ["predict_next_race"],
+        "intent": "win",
+        "followup": "Is there a reason for this?",
+    },
+    # -- compound: multiple workers chained in a single turn --
+    {
+        "question": "What is the next race and who wins it?",
+        "tools": ["get_next_race_info", "predict_next_race"],
+        "intent": "compound_win",
+    },
+    {
+        "question": "When and where is the next race, and who's on pole?",
+        "tools": ["get_next_race_info", "predict_next_qualifying"],
+        "intent": "compound_pole",
+    },
+    {
+        "question": "Where's the next race and what's the predicted podium?",
+        "tools": ["get_next_race_info", "predict_next_race"],
+        "intent": "compound_podium",
+    },
+    {
+        "question": "What is the next race? Who wins qualifying and who wins the race? Why?",
+        "tools": ["get_next_race_info", "predict_next_qualifying", "predict_next_race"],
+        "intent": "compound_full",
+        "needs_reasoning": True,
+    },
 ]
 
-SCHEDULE_PHRASES = [
-    "When and where is the next race?",
-    "When and where is the next Grand Prix?",
-    "Which circuit will the next race be on?",
-    "What is the next race?",
-]
 
-WIN_WHY_PAIRS = [
-    ("Who will win the next race?", "Why?"),
-    ("Who wins the next Grand Prix?", "Why is this the case?"),
-    ("Predict the winner of the upcoming race", "What are you basing your prediction on?"),
-    ("Who do you think takes the next race?", "Why do you think this will happen?"),
-    ("What's your pick for the next race winner?", "Is there a reason for this?"),
-]
-
-
-def _win_why_cases() -> list[dict]:
+def _build_cases() -> list[dict]:
     cases = []
-    for first, followup in WIN_WHY_PAIRS:
+    for raw in CASES_RAW:
+        tools = raw["tools"]
         cases.append(
             {
-                "inputs": {"question": first},
-                "expectations": {"route": "predictor", "tool": "predict_next_race"},
-                "tags": {"intent": "win", "pair": first},
-            }
-        )
-        cases.append(
-            {
-                "inputs": {"question": followup, "prior": first},
+                "inputs": {"question": raw["question"]},
                 "expectations": {
-                    "route": "predictor",
-                    "tool": "predict_next_race",
-                    "followup": True,
+                    "tools": tools,
+                    "compound": len(tools) > 1,
+                    "needs_reasoning": raw.get("needs_reasoning", False),
                 },
-                "tags": {"intent": "why", "pair": first},
+                "tags": {"intent": raw["intent"]},
             }
         )
+        if followup := raw.get("followup"):
+            cases.append(
+                {
+                    "inputs": {"question": followup, "prior": raw["question"]},
+                    "expectations": {"tools": tools, "followup": True},
+                    "tags": {"intent": "why", "pair": raw["question"]},
+                }
+            )
     return cases
 
 
-EVAL_CASES = (
-    _win_why_cases()
-    + [
-        {
-            "inputs": {"question": pole_phrase},
-            "expectations": {"route": "predictor", "tool": "predict_next_qualifying"},
-            "tags": {"intent": "pole"},
-        }
-        for pole_phrase in POLE_PHRASES
-    ]
-    + [
-        {
-            "inputs": {"question": schedule_phrase},
-            "expectations": {"route": "info", "tool": "get_next_race_info"},
-            "tags": {"intent": "schedule"},
-        }
-        for schedule_phrase in SCHEDULE_PHRASES
-    ]
-)
+EVAL_CASES = _build_cases()
 
 
 def _ensure_dataset():
@@ -100,47 +157,52 @@ def _last_ai_text(result: dict) -> str:
 
 
 def _make_predict_fn():
-    graph = build_agent(checkpointer=InMemorySaver())
+    graph = build_agent()
 
     def predict_fn(question: str, prior: str | None = None) -> str:
-        thread_id = str(uuid.uuid4())
-        config = {"configurable": {"thread_id": thread_id}}
+        messages = []
         if prior:
-            graph.invoke(
-                {"messages": [{"role": "user", "content": prior}]},
-                config=config,
-            )
-        result = graph.invoke(
-            {"messages": [{"role": "user", "content": question}]},
-            config=config,
-        )
+            # Run the prior turn for real, then hand the *scored* call the
+            # whole exchange as explicit input messages. An LLM judge only
+            # ever inspects the trace of the call it's scoring — a follow-up's
+            # context has to live in that call's own input, not in graph
+            # state a separate prior invoke() would leave behind but the
+            # judge can't see into.
+            first = graph.invoke({"messages": [{"role": "user", "content": prior}]})
+            messages.append({"role": "user", "content": prior})
+            messages.append({"role": "assistant", "content": _last_ai_text(first)})
+        messages.append({"role": "user", "content": question})
+
+        result = graph.invoke({"messages": messages})
         return _last_ai_text(result)
 
     return predict_fn
 
 
 @scorer
-def used_expected_tool(trace, expectations) -> bool:
-    expected = expectations["tool"]
+def used_expected_tools(trace, expectations) -> bool:
+    """Every expected tool was called, and exactly once each — covers both
+    single-worker cases (one expected tool) and compound cases (several)."""
+    expected = expectations["tools"]
     names = [s.name for s in trace.search_spans(span_type="TOOL")]
     if not names:
-        names = [s.name for s in trace.search_spans() if expected in (s.name or "")]
-    return expected in names and names.count(expected) == 1
+        names = [s.name for s in trace.search_spans() if any(t in (s.name or "") for t in expected)]
+    return all(names.count(t) == 1 for t in expected)
 
 
 @scorer
-def no_extra_prediction_tool(trace, expectations) -> bool:
+def no_unexpected_tools(trace, expectations) -> bool:
+    """No tool was called outside the expected set — catches a single-intent
+    question accidentally triggering the other worker's tool, and a compound
+    question accidentally skipping a worker it needed."""
+    expected = set(expectations["tools"])
     names = {s.name for s in trace.search_spans(span_type="TOOL")}
-    if expectations["tool"] == "get_next_race_info":
-        return "predict_next_race" not in names and "predict_next_qualifying" not in names
-    if expectations["tool"] == "predict_next_race":
-        return "predict_next_qualifying" not in names
-    return True
+    return names <= expected
 
 
 @scorer
 def mentions_tool_winner(outputs: str, expectations) -> bool:
-    if expectations.get("tool") != "predict_next_race":
+    if "predict_next_race" not in expectations.get("tools", []):
         return True
     from f1_ml.models.race.predict import predict_next_race
 
@@ -149,15 +211,40 @@ def mentions_tool_winner(outputs: str, expectations) -> bool:
 
 
 @scorer
+def mentions_pole_winner(outputs: str, expectations) -> bool:
+    if "predict_next_qualifying" not in expectations.get("tools", []):
+        return True
+    from f1_ml.models.qualifying.predict import predict_next_qualifying
+
+    pole = predict_next_qualifying().to_dict(top_n=1)["pole"]["driver_name"]
+    return pole.lower() in outputs.lower()
+
+
+@scorer
+def mentions_race_name(outputs: str, expectations) -> bool:
+    """For any case that hits the info tool, the merged/polished answer must
+    still carry the race name — guards against the editor step dropping the
+    schedule half of a compound answer."""
+    if "get_next_race_info" not in expectations.get("tools", []):
+        return True
+    from f1_ml.inference.next_race import resolve_target_race
+
+    race_name = resolve_target_race().race_name
+    return race_name.lower() in outputs.lower()
+
+
+@scorer
 def short_win_answer(outputs: str, expectations) -> bool:
-    if expectations.get("followup") or expectations.get("tool") != "predict_next_race":
+    if expectations.get("followup") or expectations.get("compound"):
+        return True
+    if expectations.get("tools") != ["predict_next_race"]:
         return True
     return len(outputs.split()) <= 40
 
 
 @scorer
 def why_uses_features(outputs: str, expectations) -> bool:
-    if not expectations.get("followup"):
+    if not (expectations.get("followup") or expectations.get("needs_reasoning")):
         return True
     text = outputs.lower()
     hints = ("feature", "qualifying", "median", "constructor", "last")
@@ -171,9 +258,11 @@ def run_eval(*, register_dataset: bool = True, llm_judges: bool = False):
 
     data = _ensure_dataset() if register_dataset else EVAL_CASES
     scorers = [
-        used_expected_tool,
-        no_extra_prediction_tool,
+        used_expected_tools,
+        no_unexpected_tools,
         mentions_tool_winner,
+        mentions_pole_winner,
+        mentions_race_name,
         short_win_answer,
         why_uses_features,
     ]
